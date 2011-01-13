@@ -1,0 +1,399 @@
+@import url(reset.css);
+
+/* ----------------------------------------------------- Page layout */
+
+BODY {
+	background: #03060b;
+	color: #efefef;
+	font: 11px/1.5em "Lucida Grande", Verdana, "Trebuchet MS", sans-serif;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+/*
+	-------
+	xHTML ELEMENTS
+	-------
+*/
+
+DIV {
+	text-align: left;
+}
+
+ACRONYM, ABBR {
+	cursor: help;
+	border-bottom-width: 1px;
+	border-bottom-style: dotted;
+}
+
+
+H1 {
+	font-size: 5%;
+	text-indent: -2000px;
+	overflow: hidden;
+	background: url(../img/logo.gif) center no-repeat;
+	width: 469px;
+	height: 37px;
+}
+
+H2 {
+	font-size: 24px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+A {
+	color: #efefef;
+}
+
+
+/*
+	-------
+	IDs
+	-------
+*/
+
+#wrapper {
+	width: 910px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 40px;
+}
+
+#header {
+	height: 103px;
+	background: #adaeaf url(../img/header_back.png) center repeat-x;
+}
+
+#headercontent {
+	padding: 21px 20px 0 20px;
+}
+
+#body {
+	background: #292929;
+	padding: 25px 20px 20px 20px;
+}
+
+#result {
+	width: 600px;
+	height: 400px;
+	float: left;
+	margin-bottom: 20px;
+	background: #292929 url(../img/wheel.gif) center no-repeat;
+}
+
+#panel {
+	width: 250px;
+	float: right;
+}
+
+#adjust {
+	width: 600px;
+	float: left;
+}
+
+#lexikon {
+	width: 600px;
+	float: left;
+}
+
+#settings {
+	width: 250px;
+	float: right;
+}
+
+#histogramm_box DIV {
+	overflow: hidden;
+	width: 250px;
+	height: 135px;
+	background: #292929 url(../img/wheel.gif) center no-repeat;
+}
+
+#cameravalues_box {
+	font-family: Georgia, "Times New", serif;
+	font-size: 250%;
+	line-height: 130%;
+	font-weight: bold;
+	padding: 12px;
+}
+
+
+#footer {
+	padding: 3px;
+	text-align: right;
+	color: #222;
+}
+#footer A { color: #222; text-decoration: none; }
+#footer A:HOVER { color: #777; }
+
+
+/*
+	-------
+	Classes
+	-------
+*/
+
+.clearer {
+	clear: both;
+	height: 1px;
+	font-size: 5%;
+	overflow: hidden;
+}
+
+.textright { text-align: right; }
+.textleft { text-align: left; }
+
+.panelbox {
+	margin-bottom: 15px;
+}
+
+.boxtitle {
+	background-image: url(../img/hr.gif);
+	background-position: center bottom;
+	background-repeat: repeat-x;
+}
+
+.boxtitle A {
+	color: #efefef;
+	text-decoration: none;
+	display: block;
+	padding: 6px 18px 8px 18px;
+}
+
+.boxtitle A.triangle {
+	background-image: url(../img/triangle.gif);
+	background-repeat: no-repeat;
+}
+
+.boxtitle:HOVER {
+	background-color: #231f20;
+}
+
+.panelcontent {
+	padding: 10px 6px 8px 6px;
+	background: #231f20 url(../img/hr.gif) center bottom repeat-x;
+}
+
+.sliderbox {
+	margin-bottom: 6px;
+}
+
+.sliderbox .c1, .sliderbox .c2, .sliderbox .c3, .sliderbox .c4 {	float: left; }
+
+.sliderbox .c1 {
+	width: 75px;
+	font-weight: bold;
+}
+
+.sliderbox .c2 {
+	width: 50px;
+	padding-right: 3px;
+	text-align: right;
+}
+
+.sliderbox .c3 {
+	width: 410px;
+	margin-top: 4px;
+}
+
+.sliderbox .c4 {
+	width: 45px;
+	padding-left: 5px;
+}
+
+
+/*- Slider --------------------------- */
+
+.trackh {
+	width: 410px;
+	height: 10px;
+	background: url(../img/track.gif) center no-repeat;
+	overflow: hidden;
+}
+
+.trackv {
+	width: 320px;
+	height: 360px;
+	border: 1px inset #333333;
+}
+
+.handle {
+	cursor: move;
+	width: 25px;
+	height: 10px;
+	background: url(../img/handle.gif) no-repeat;
+}
+
+/*- Special Designs --------------------------- */
+#focusTrack {
+	background: url(../demos/pointoffocus/focus_track.jpg) center no-repeat;
+	width: 238px;
+	height: 264px;
+	border: 0;
+}
+#focusHandle {
+	width: 100%;
+	background: url(../img/handle_focus.png) no-repeat;
+	height: 19px;
+}
+#focusHandle:HOVER {background-image: url(../img/handle_focus_hover.png)}
+
+
+
+
+
+
+
+/*- Menu Tabs --------------------------- */
+
+    #tabs {
+      width:100%;
+			height: 33px;
+			margin-top: 12px;
+      		line-height:normal;
+ 	   		font: bold 11px/1.5em Verdana;
+      }
+    #tabs ul {
+	  	margin:0;
+	  	padding:0;
+	  	list-style:none;
+      }
+    #tabs li {
+	      display:inline;
+	      margin:0;
+	      padding:0;
+      }
+    #tabs a {
+      float:left;
+      background: url("../img/tableft.gif") no-repeat left top;
+      margin:0;
+      padding:0 0 0 4px;
+      text-decoration:none;
+      }
+    #tabs a span {
+      float:left;
+      display:block;
+      background:url("../img/tabright.gif") no-repeat right top;
+      padding:12px 20px 4px 12px;
+      color:#333333;
+      }
+    /* Commented Backslash Hack hides rule from IE5-Mac \*/
+    #tabs a span {float:none;}
+    /* End IE5-Mac hack */
+    #tabs a:hover span, #tabs a.active span {
+      color:#efefef;
+			height: 22px;
+			float: left;
+			padding-top: 8px;
+      }
+    #tabs a:hover, #tabs a.active {
+      background-position:0% -33px;
+      }
+    #tabs a:hover span, #tabs a.active SPAN {
+      background-position:100% -33px;
+      }
+			
+
+
+
+
+
+
+
+/* Checkboxes */
+LABEL {
+	cursor: pointer;
+}
+
+label.checkbox_checked {
+	background: url(../img/check_on.gif) center left no-repeat;	
+	display: block;
+	margin: 0 0 10px 0;
+	padding-left: 20px;
+}
+label.checkbox_unchecked  {
+	background: url(../img/check_off.gif) center left no-repeat;	
+	display: block;
+	margin: 0 0 10px 0;
+	padding-left: 20px;
+}
+
+/* Radio Buttons */
+label.radio_checked {
+	background: url(../img/check_on.gif) center left no-repeat;	
+	display: block;
+	margin: 0 0 10px 0;
+	padding-left: 20px;
+}
+label.radio_unchecked  {
+	background: url(../img/check_off.gif) center left no-repeat;	
+	display: block;
+	margin: 0 0 10px 0;
+	padding-left: 20px;
+}
+
+
+/* Hover State */
+label:hover{
+	color: #afafaf;
+}
+
+label.highlighted {
+	border: 1px solid #333;
+}
+
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+/* STOP EDITTING - DO NOT CHANGE OR REMOVE        */
+.crirHidden {
+	position: absolute;
+	left: -1000px;
+}
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+
+
+
+
+
+
+
+/* prototip.css : http://www.nickstakenburg.com/projects/prototip */
+.prototip { position: absolute; }
+.prototip .effectWrapper,
+.prototip .tooltip,
+.prototip .toolbar,
+.prototip .toolbar .title {	position: relative; }
+.prototip .content { clear: both; }
+.prototip .toolbar a.close {
+	position: relative;
+	text-decoration: none;
+	float: right;
+	width: 15px;
+	height: 15px;
+	background: transparent url(close.gif);
+	display: block;
+	line-height: 0;
+	font-size: 0px;
+	border: 0;
+}
+.prototip .toolbar a.close:hover { background: transparent url(close_hover.gif); }
+
+.prototipLoader {
+	position: absolute;
+	top: -1000px;
+	left: -1000px;
+	background: url(prototip_loader.gif);
+	height: 14px;
+	width: 14px;
+}
+
+.iframeShim { 
+	position: absolute;
+	border: 0;
+	margin: 0;	
+    padding: 0;
+    background: none;
+}
+
+/* Tooltip styles */
+.prototip .default { width: 200px; background: #cdcecf; color: black; padding: 6px; }

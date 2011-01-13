@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>Understanding Photography: Fokus</title>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<link href="css/screen.css" rel="stylesheet" media="screen" type="text/css" />
+	<link href="css/print.css" rel="stylesheet" media="print" type="text/css" />
+	<script src="js/prototype.js" type="text/javascript"></script>
+	<script src="js/scriptaculous.js" type="text/javascript"></script>
+	<script src="js/application.js" type="text/javascript"></script>
+	<script src="js/crir.js" type="text/javascript"></script>
+	<script src="js/prototip.js" type="text/javascript"></script>
+</head>
+<body onload="initFocus()">
+
+<div id="wrapper">
+	
+	<div id="header"><div id="headercontent">
+		<h1>Understanding Photography</h1>
+		<div id="tabs">
+			<ul>
+				<li><a href="index.html" title="Start"><span>Start</span></a></li>
+				<li><a href="focus.html" title="Fokus" class="active"><span>Fokus</span></a></li>
+				<li><a href="aperture.html" title="Blende &amp; Verschlusszeit"><span>Blende &amp; Verschlusszeit</span></a></li>
+				<li><a href="focallength.html" title="Brennweite"><span>Brennweite</span></a></li>
+				<li><a href="whitebalance.html" title="Wei&amp;abgleich"><span>Wei&szlig;abgleich</span></a></li>
+				<li><a href="iso.html" title="ISO"><span>ISO</span></a></li>
+				<li><a href="extras1.html" title="Extras"><span>weitere Beispiele</span></a></li>
+			</ul>
+		</div>
+	</div></div>
+	
+	<div id="body">
+		<h2>Fokus</h2>
+		
+		<div id="result">
+			<img src="demos/pointoffocus/focus-21.jpg" width="600" height="400" alt="" id="focusImage" />
+		</div>
+		
+		<div id="panel">
+			<div id="cameravalues" class="panelbox">
+				<div class="boxtitle textright"><a onclick="toggle_box('cameravalues_box'); return false" href="#" id="cameravalues_box_title" style="background-position: right -26px;" class="triangle">Kameraeinstellungen</a></div>
+				<div id="cameravalues_box" class="panelcontent" style="display: none;"><div>
+					<span>50 mm<br />
+					f/1.8<br />
+					1/100 sec<br />
+					ISO 200</span>
+				</div></div>
+			</div>
+
+			<div id="adjustfocus" class="panelbox">
+				<div class="boxtitle"><a href="#">Sch&auml;rfepunkt w&auml;hlen</a></div>
+				<div id="adjust_box"><div class="panelcontent">
+					<div class="sliderbox">
+						<div class="trackv" id='focusTrack'><div class="handle" id='focusHandle'></div></div>
+					<div class="clearer">&nbsp;</div>
+					</div>
+				</div></div>
+			</div>
+			
+		</div>
+
+<!--		
+		<div id="lexikon" class="panelbox">
+			<div class="boxtitle textleft"><a onclick="toggle_box('lexikon_box','left'); return false" href="#" id="lexikon_box_title" style="background-position: left -26px;" class="triangle">Lexikon</a></div>
+			<div id="lexikon_box" class="panelcontent" style="display: none;"><div>
+				<em>Lesen Sie dazu online den Artikel <a href="http://de.wikipedia.org/wiki/Fokus">'Fokus' in der deutschsprachigen Wikipedia</a>.</em>
+			</div></div>
+		</div>
+-->
+
+		<div class="clearer">&nbsp;</div>
+
+	</div>
+	
+	<div id="footer">
+		v0.8a &mdash; &copy; 2009 by <a href="mailto:frischmilch@gmail.com">Johannes Henseler</a> &mdash; <a href="http://nordsueddesign.de">nordsueddesign.de</a>
+	</div>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>Understanding Photography: Blende & Verschlusszeit</title>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<link href="css/screen.css" rel="stylesheet" media="screen" type="text/css" />
+	<link href="css/print.css" rel="stylesheet" media="print" type="text/css" />
+	<script src="js/prototype.js" type="text/javascript"></script>
+	<script src="js/scriptaculous.js" type="text/javascript"></script>
+	<script src="js/application.js" type="text/javascript"></script>
+	<script src="js/crir.js" type="text/javascript"></script>
+	<script src="js/prototip.js" type="text/javascript"></script>
+</head>
+<body onload="initAperture()">
+
+<div id="wrapper">
+	
+	<div id="header"><div id="headercontent">
+		<h1>Understanding Photography</h1>
+		<div id="tabs">
+			<ul>
+				<li><a href="index.html" title="Start"><span>Start</span></a></li>
+				<li><a href="focus.html" title="Fokus"><span>Fokus</span></a></li>
+				<li><a href="aperture.html" title="Blende &amp; Verschlusszeit" class="active"><span>Blende &amp; Verschlusszeit</span></a></li>
+				<li><a href="focallength.html" title="Brennweite"><span>Brennweite</span></a></li>
+				<li><a href="whitebalance.html" title="Wei&amp;abgleich"><span>Wei&szlig;abgleich</span></a></li>
+				<li><a href="iso.html" title="ISO"><span>ISO</span></a></li>
+				<li><a href="extras1.html" title="Extras"><span>weitere Beispiele</span></a></li>
+			</ul>
+		</div>
+	</div></div>
+	
+	<div id="body">
+		<h2>Blende &amp; Verschlusszeit</h2>
+		
+		<div id="result">
+			<img src="demos/aperture/photo_1-40 sec at f-1.8.jpg" width="600" height="400" alt="" id="apertureImage" />
+		</div>
+		
+		<div id="panel">
+			<div id="histogramm" class="panelbox">
+				<div class="boxtitle textright"><a onclick="toggle_box('histogramm_box'); return false" href="#" id="histogramm_box_title" style="background-position: right 6px;" class="triangle">Histogramm</a></div>
+				<div id="histogramm_box"><div>
+					<img src="demos/aperture/histograms/photo_1-40-sec-at-f-1.8.gif" width="249" height="134" alt="" id="apertureHistogram" />
+				</div></div>
+			</div>
+			
+			<div id="cameravalues" class="panelbox">
+				<div class="boxtitle textright"><a onclick="toggle_box('cameravalues_box'); return false" href="#" id="cameravalues_box_title" style="background-position: right 6px;" class="triangle">Kamerawerte</a></div>
+				<div id="cameravalues_box" class="panelcontent"><div>
+					f/<span id="apertureValue">1.8</span><br />
+					<span id="exposureValue">1/40</span> sec
+				</div></div>
+			</div>
+			
+		</div>
+
+		<div class="clearer">&nbsp;</div>
+		
+		<div id="adjust" class="panelbox">
+			<div class="boxtitle"><a href="#">Werte</a></div>
+			<div id="adjust_box"><div class="panelcontent">
+				<div class="sliderbox" id="slider_aperture">
+					<div class="c1">Blende (f)</div>
+					<div class="c2">1.8</div>
+					<div class="c3"><div class="trackh" id='apertureTrack'><div class="handle" id='apertureHandle'></div></div></div>
+					<div class="c4">22</div>
+				<div class="clearer">&nbsp;</div>
+				</div>
+				
+
+				<div class="sliderbox" id="slider_exposure">
+					<div class="c1">Zeit (sec)</div>
+					<div class="c2">1/4000</div>
+					<div class="c3"><div class="trackh" id='exposureTrack'><div class="handle" id='exposureHandle'></div></div></div>
+					<div class="c4">30</div>
+				<div class="clearer">&nbsp;</div>
+				</div>
+
+				
+			</div></div>
+		</div>
+
+		<div id="settings" class="panelbox">
+			<div class="boxtitle textright"><a onclick="toggle_box('settings_box'); return false" href="#" id="settings_box_title" style="background-position: right 6px;" class="triangle">Kamera-Automatik</a></div>
+			<div id="settings_box" class="panelcontent"><div>
+				<form action="" method="get">
+					<label for="no_auto">Keine (<acronym id="no_auto_tip">?</acronym>)</label><input name="auto_modes" id="no_auto" type="radio" value="true" class="crirHiddenJS" checked="checked" onchange="auto_mod_change()" />
+					<script type="text/javascript" charset="utf-8">new Tip('no_auto_tip', 'Keine Automatik. Manuelle Einstellung aller Werte.');</script>
+					<label for="auto_aperture">Blendenautomatik Tv (<acronym id="auto_aperture_tip">?</acronym>)</label><input name="auto_modes" id="auto_aperture" type="radio" value="true" class="crirHiddenJS" onchange="auto_mod_change()" />
+					<script type="text/javascript" charset="utf-8">new Tip('auto_aperture_tip', 'oder Zeitvorwahl - Verschlusszeit wird vorgew&auml;hlt, Blende wird automatisch eingestellt');</script>
+					<label for="auto_exposure">Zeitautomatik Av (<acronym id="auto_exposure_tip">?</acronym>)</label><input name="auto_modes" id="auto_exposure" type="radio" value="true" class="crirHiddenJS" onchange="auto_mod_change()" />
+					<script type="text/javascript" charset="utf-8">new Tip('auto_exposure_tip', 'oder Blendenvorwahl - Blende wird vorgew&auml;hlt, Verschlusszeit wird automatisch eingestellt');</script>
+				</form>
+			</div></div>
+		</div>
+
+		<div class="clearer">&nbsp;</div>
+
+	</div>
+	
+	<div id="footer">
+		v0.8a &mdash; &copy; 2009 by <a href="mailto:frischmilch@gmail.com">Johannes Henseler</a> &mdash; <a href="http://nordsueddesign.de">nordsueddesign.de</a>
+	</div>
+</div>
+
+
+
+</body>
+</html>

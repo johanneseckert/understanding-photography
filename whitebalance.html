@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>Understanding Photography: Weißabgleich</title>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<link href="css/screen.css" rel="stylesheet" media="screen" type="text/css" />
+	<link href="css/print.css" rel="stylesheet" media="print" type="text/css" />
+	<script src="js/prototype.js" type="text/javascript"></script>
+	<script src="js/scriptaculous.js" type="text/javascript"></script>
+	<script src="js/application.js" type="text/javascript"></script>
+	<script src="js/crir.js" type="text/javascript"></script>
+	<script src="js/prototip.js" type="text/javascript"></script>
+</head>
+<body onload="initWhitebalance()">
+
+<div id="wrapper">
+	
+	<div id="header"><div id="headercontent">
+		<h1>Understanding Photography</h1>
+		<div id="tabs">
+			<ul>
+				<li><a href="index.html" title="Start"><span>Start</span></a></li>
+				<li><a href="focus.html" title="Fokus"><span>Fokus</span></a></li>
+				<li><a href="aperture.html" title="Blende &amp; Verschlusszeit"><span>Blende &amp; Verschlusszeit</span></a></li>
+				<li><a href="focallength.html" title="Brennweite"><span>Brennweite</span></a></li>
+				<li><a href="whitebalance.html" title="Wei&amp;abgleich" class="active"><span>Wei&szlig;abgleich</span></a></li>
+				<li><a href="iso.html" title="ISO"><span>ISO</span></a></li>
+				<li><a href="extras1.html" title="Extras"><span>weitere Beispiele</span></a></li>
+			</ul>
+		</div>
+	</div></div>
+	
+	<div id="body">
+		<h2>Wei&szlig;abgleich</h2>
+		
+		<div id="result">
+			<img src="demos/whitebalance/photo_3450 kelvin.jpg" width="600" height="400" alt="" id="whitebalanceImage" />
+			<div id="loadwheel">&nbsp;</div>
+		</div>
+		
+		<div id="panel">
+			<div id="exmaples" class="panelbox">
+				<div class="boxtitle textright"><a onclick="toggle_box('exmaples_box'); return false" href="#" id="exmaples_box_title" style="background-position: right -26px;" class="triangle">andere Beispiele</a></div>
+				<div id="exmaples_box" class="panelcontent" style="display: none;"><div>
+					<a href="whitebalance2.html">Portrait in Studio</a>
+				</div></div>
+			</div>
+			
+			<div id="cameravalues" class="panelbox">
+				<div class="boxtitle textright"><a onclick="toggle_box('cameravalues_box'); return false" href="#" id="cameravalues_box_title" style="background-position: right 6px;" class="triangle">Temperatur</a></div>
+				<div id="cameravalues_box" class="panelcontent"><div>
+					<span id="whitebalanceValue">3450</span>&deg; Kelvin</span>
+				</div></div>
+			</div>
+			
+		</div>
+
+		<div class="clearer">&nbsp;</div>
+		
+		<div id="adjust" class="panelbox">
+			<div class="boxtitle"><a href="#">Farbtemperatur f&uuml;r den Wei&szlig;abgleich</a></div>
+			<div id="adjust_box"><div class="panelcontent">
+				<div class="sliderbox">
+					<div class="c1">Kelvin (&deg;K)</div>
+					<div class="c2">2200</div>
+					<div class="c3"><div class="trackh" id='whitebalanceTrack'><div class="handle" id='whitebalanceHandle'></div></div></div>
+					<div class="c4">10000</div>
+				<div class="clearer">&nbsp;</div>
+				</div>
+			</div></div>
+		</div>
+
+		<div class="clearer">&nbsp;</div>
+
+	</div>
+	
+	<div id="footer">
+		v0.8a &mdash; &copy; 2009 by <a href="mailto:frischmilch@gmail.com">Johannes Henseler</a> &mdash; <a href="http://nordsueddesign.de">nordsueddesign.de</a>
+	</div>
+</div>
+
+
+</body>
+</html>
