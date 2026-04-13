@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 — Zonenanalyse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<style>
+  :root{
+    --bg:#0c0c0c;--bg2:#141414;--bg3:#1c1c1c;
+    --border:#2a2a2a;--border-light:#383838;
+    --text:#e8e4de;--text-muted:#6b6660;--text-dim:#9b9590;
+    --accent:#c8a97e;--accent-dim:rgba(200,169,126,0.12);
+    --white:#f0ece6;
+    --mono:'DM Mono',monospace;--serif:'Cormorant Garamond',Georgia,serif;--sans:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
+
+  header{
+    position:sticky;top:0;z-index:200;
+    background:rgba(12,12,12,0.93);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:0 2rem;height:54px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .hdr-title{font-family:var(--serif);font-size:1rem;font-weight:300;color:var(--text-dim)}
+  .hdr-title span{color:var(--accent)}
+  .hdr-num{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;color:var(--text-muted)}
+
+  main{padding:2rem 2rem 3rem;max-width:1300px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem}
+  h2{font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--white);line-height:1.15;margin-bottom:0.4rem}
+  .intro{font-size:0.87rem;color:var(--text-dim);max-width:660px;line-height:1.7;margin-bottom:2rem}
+
+  .label{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem}
+
+  /* controls row */
+  .controls-row{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+
+  .img-btn,.mode-btn{
+    background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+    color:var(--text-dim);font-family:var(--mono);font-size:0.65rem;
+    letter-spacing:0.05em;padding:0.45rem 0.9rem;cursor:pointer;transition:all 0.15s;
+  }
+  .img-btn:hover,.mode-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .img-btn.active,.mode-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .img-btn input{display:none}
+
+  .divider-v{width:1px;height:28px;background:var(--border)}
+
+  /* canvas container */
+  .canvas-container{
+    position:relative;
+    border:1px solid var(--border);border-radius:4px;overflow:hidden;
+    background:#111;
+    margin-bottom:1rem;
+    cursor:crosshair;
+  }
+  #p5-canvas-holder{display:block}
+  #p5-canvas-holder canvas{display:block!important}
+
+  /* probe overlay */
+  .probe{
+    position:absolute;pointer-events:none;
+    display:none;
+    z-index:10;
+  }
+  .probe-inner{
+    background:rgba(0,0,0,0.82);border:1px solid var(--accent);border-radius:3px;
+    padding:0.5rem 0.75rem;
+    font-family:var(--mono);font-size:0.68rem;color:var(--white);
+    letter-spacing:0.04em;white-space:nowrap;
+    transform:translate(12px,-50%);
+  }
+  .probe-zone-num{font-family:var(--serif);font-size:1.4rem;color:var(--accent);line-height:1}
+  .probe-lum{color:var(--text-muted);font-size:0.6rem}
+  .probe-name{color:var(--text-dim);font-size:0.65rem;margin-top:2px}
+
+  /* blend slider */
+  .blend-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:1rem}
+  .blend-row .bl{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.08em;flex-shrink:0}
+  .blend-row input{flex:1}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--border-light);border-radius:2px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer}
+
+  /* bottom grid */
+  .bottom-grid{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start}
+
+  /* histogram */
+  #histCanvas{display:block;width:100%;border-radius:3px}
+
+  /* zone legend */
+  .zone-legend{display:flex;flex-direction:column;gap:0}
+  .zl-item{
+    display:flex;align-items:center;gap:0.75rem;padding:0.4rem 0;
+    border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;
+    border-radius:2px;padding-left:0.4rem;
+  }
+  .zl-item:hover{background:var(--accent-dim)}
+  .zl-item:last-child{border-bottom:none}
+  .zl-swatch{width:20px;height:20px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
+  .zl-gray{width:20px;height:20px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
+  .zl-num{font-family:var(--serif);font-size:1rem;color:var(--text);min-width:22px}
+  .zl-name{font-size:0.73rem;color:var(--text-dim);flex:1}
+  .zl-pct{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted)}
+
+  .zone-stat-bar{
+    height:3px;border-radius:2px;margin-top:2px;
+    background:var(--accent);transition:width 0.6s ease;
+  }
+
+  /* status bar */
+  .status-bar{
+    display:flex;gap:2rem;align-items:center;
+    font-family:var(--mono);font-size:0.65rem;color:var(--text-muted);letter-spacing:0.06em;
+    padding:0.6rem 0.5rem;
+  }
+  .status-bar .val{color:var(--accent)}
+  .status-bar .sep{color:var(--border-light)}
+
+  /* mode label overlay */
+  .mode-badge{
+    position:absolute;top:10px;right:10px;
+    font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;
+    background:rgba(0,0,0,0.7);color:var(--accent);
+    padding:3px 9px;border-radius:2px;pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-title">Photoclub Reutlingen — <span>Zonenanalyse</span></div>
+  <div class="hdr-num">05 — ZONENANALYSE</div>
+</header>
+
+<main>
+  <div class="eyebrow">05 — Zonenanalyse auf echtem Foto</div>
+  <h2>Zonen sichtbar machen</h2>
+  <p class="intro">Die Heatmap färbt jeden Bildpunkt nach seiner Zone ein — von Dunkelblau (Zone 0) bis Dunkelrot (Zone X). Das Histogramm zeigt die Verteilung aller Tonwerte über die 11 Zonen. Bewege die Maus über das Bild um die Zone an jedem Punkt zu lesen.</p>
+
+  <div class="controls-row">
+    <span class="label" style="margin:0">Foto:</span>
+    <button class="img-btn active" onclick="loadPreset(0,this)">Stadtpanorama</button>
+    <button class="img-btn" onclick="loadPreset(1,this)">Portrait</button>
+    <button class="img-btn" onclick="loadPreset(2,this)">Landschaft</button>
+    <label class="img-btn" style="cursor:pointer">Eigenes Bild<input type="file" accept="image/*" onchange="loadUserFile(this)"></label>
+    <div class="divider-v"></div>
+    <span class="label" style="margin:0">Ansicht:</span>
+    <button class="mode-btn" id="btn-color" onclick="setMode('color',this)">Farbe</button>
+    <button class="mode-btn" id="btn-bw" onclick="setMode('bw',this)">S/W</button>
+    <button class="mode-btn active" id="btn-heat" onclick="setMode('heat',this)">Zonen-Heatmap</button>
+  </div>
+
+  <div class="blend-row" id="blendRow">
+    <span class="bl">S/W</span>
+    <input type="range" id="blendSlider" min="0" max="100" value="80" oninput="updateBlend()">
+    <span class="bl">HEATMAP</span>
+    <span style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);min-width:32px;text-align:right" id="blendPct">80%</span>
+  </div>
+
+  <div class="canvas-container" id="canvasContainer">
+    <div id="p5-canvas-holder"></div>
+    <div class="probe" id="probe">
+      <div class="probe-inner">
+        <div class="probe-zone-num" id="probeZone">V</div>
+        <div class="probe-name" id="probeName">Mittleres Grau</div>
+        <div class="probe-lum" id="probeLum">Luminanz: 128</div>
+      </div>
+    </div>
+    <div class="mode-badge" id="modeBadge">ZONEN-HEATMAP</div>
+  </div>
+
+  <div class="status-bar">
+    <span>Zone: <span class="val" id="statZone">—</span></span>
+    <span class="sep">|</span>
+    <span>Luminanz: <span class="val" id="statLum">—</span></span>
+    <span class="sep">|</span>
+    <span>RGB: <span class="val" id="statRGB">—</span></span>
+    <span class="sep">|</span>
+    <span>Durchschnitt: <span class="val" id="statAvg">—</span></span>
+  </div>
+
+  <div class="bottom-grid">
+    <div>
+      <span class="label">Histogramm — Luminanzverteilung mit Zonengrenzen</span>
+      <div class="panel" style="padding:1rem;">
+        <canvas id="histCanvas" height="140"></canvas>
+        <div id="zoneBarLegend" style="display:flex;margin-top:4px;"></div>
+      </div>
+    </div>
+    <div>
+      <span class="label">Zonenverteilung im Bild</span>
+      <div class="panel" style="padding:0.75rem 1rem;">
+        <div class="zone-legend" id="zoneLegend"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── ZONE DATA ──────────────────────────────────────────────────────────
+const ZONE_NAMES = [
+  'Reines Schwarz','Fast Schwarz','Tiefe Schatten','Untere Mitteltöne',
+  'Dunklere Mitteltöne','Mittleres Grau','Helle Mitteltöne',
+  'Helles Grau','Sehr helle Töne','Fast Weiß','Reines Weiß'
+];
+const ZONE_ROMANS = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+
+// Heatmap colors per zone: vivid spectral palette blue→green→yellow→red
+const ZONE_HEAT = [
+  [10,  15, 120],   // 0  deep blue
+  [20,  60, 200],   // I  blue
+  [20, 130, 230],   // II sky blue
+  [20, 190, 190],   // III cyan
+  [30, 190, 100],   // IV teal-green
+  [80, 210,  30],   // V  green
+  [180,220,  10],   // VI yellow-green
+  [240,170,   0],   // VII yellow-orange
+  [240, 90,   0],   // VIII orange
+  [210,  20,  10],  // IX red
+  [140,   0,  10],  // X  dark red
+];
+
+const IMAGES = [
+  'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=900&q=80&fit=crop',
+  'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=900&q=80&fit=crop',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80&fit=crop',
+];
+
+function getLuminance(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; }
+function getZone(lum){ return Math.min(10, Math.floor(lum/256*11)); }
+
+// ─── P5 SKETCH ──────────────────────────────────────────────────────────
+let sourceImg = null;
+let imgPixels = null; // flat RGBA array from source
+let imgW=0, imgH=0;
+let renderMode = 'heat'; // 'color' | 'bw' | 'heat'
+let blendAmt = 0.8;
+let histogram = new Array(256).fill(0);
+let zoneCounts = new Array(11).fill(0);
+let avgLum = 128;
+let p5inst = null;
+let outputGraphics = null;
+let needsRedraw = true;
+let canvasDisplayW = 800;
+let canvasDisplayH = 500;
+let cursorZone = -1;
+let cursorLum = 0;
+let cursorRGB = [0,0,0];
+let scaledImgW = 0, scaledImgH = 0;
+let offsetX = 0, offsetY = 0;
+
+const sketch = function(p) {
+  p.setup = function() {
+    const holder = document.getElementById('p5-canvas-holder');
+    const w = Math.min(holder.parentElement.clientWidth - 2, 1100);
+    canvasDisplayW = w;
+    canvasDisplayH = Math.round(w * 0.55);
+    const cnv = p.createCanvas(canvasDisplayW, canvasDisplayH);
+    cnv.parent('p5-canvas-holder');
+    p.noLoop();
+    p.pixelDensity(1);
+    p.noStroke();
+
+    // Load default image
+    loadImageURL(IMAGES[0]);
+  };
+
+  p.draw = function() {
+    if (!needsRedraw) return;
+    needsRedraw = false;
+    p.background(20);
+
+    if (!imgPixels || imgW === 0) {
+      // loading state
+      p.fill(40);
+      p.rect(0,0,canvasDisplayW,canvasDisplayH);
+      p.fill(100);
+      p.textFont('DM Sans,sans-serif');
+      p.textSize(13);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text('Bild wird geladen…', canvasDisplayW/2, canvasDisplayH/2);
+      return;
+    }
+
+    // Scale to fit
+    const scale = Math.min(canvasDisplayW/imgW, canvasDisplayH/imgH);
+    scaledImgW = Math.round(imgW*scale);
+    scaledImgH = Math.round(imgH*scale);
+    offsetX = Math.round((canvasDisplayW-scaledImgW)/2);
+    offsetY = Math.round((canvasDisplayH-scaledImgH)/2);
+
+    // Render to pixel buffer
+    p.loadPixels();
+    const d = p.pixels;
+
+    for (let sy=0; sy<canvasDisplayH; sy++) {
+      for (let sx=0; sx<canvasDisplayW; sx++) {
+        // Map canvas pixel to source image pixel
+        const ix = Math.floor((sx-offsetX)/scale);
+        const iy = Math.floor((sy-offsetY)/scale);
+        const pi = (sy*canvasDisplayW+sx)*4;
+
+        if (ix<0||iy<0||ix>=imgW||iy>=imgH) {
+          d[pi]=20;d[pi+1]=20;d[pi+2]=20;d[pi+3]=255;
+          continue;
+        }
+
+        const si=(iy*imgW+ix)*4;
+        const r=imgPixels[si], g=imgPixels[si+1], b=imgPixels[si+2];
+        const lum=getLuminance(r,g,b);
+        const zone=getZone(lum);
+
+        if (renderMode==='color') {
+          d[pi]=r;d[pi+1]=g;d[pi+2]=b;d[pi+3]=255;
+        } else if (renderMode==='bw') {
+          const l=Math.round(lum);
+          d[pi]=l;d[pi+1]=l;d[pi+2]=l;d[pi+3]=255;
+        } else {
+          // heat: blend between bw and zone color
+          const l=Math.round(lum);
+          const hc=ZONE_HEAT[zone];
+          const bl=blendAmt;
+          d[pi  ]=Math.round(l*(1-bl)+hc[0]*bl);
+          d[pi+1]=Math.round(l*(1-bl)+hc[1]*bl);
+          d[pi+2]=Math.round(l*(1-bl)+hc[2]*bl);
+          d[pi+3]=255;
+        }
+      }
+    }
+    p.updatePixels();
+
+    // Zone grid lines (only in heat mode)
+    if (renderMode==='heat') {
+      p.strokeWeight(0.5);
+      for (let z=1; z<=10; z++) {
+        const boundary = Math.round(z/11*255);
+        // Not drawing per-pixel boundaries here, handled in shader
+      }
+      p.noStroke();
+    }
+
+    // Cursor zone highlight ring
+    if (cursorZone>=0) {
+      const mx=p.mouseX, my=p.mouseY;
+      if (mx>=offsetX&&mx<=offsetX+scaledImgW&&my>=offsetY&&my<=offsetY+scaledImgH) {
+        const hc=ZONE_HEAT[cursorZone];
+        p.noFill();
+        p.stroke(hc[0],hc[1],hc[2],200);
+        p.strokeWeight(2);
+        p.ellipse(mx,my,22,22);
+        p.noStroke();
+      }
+    }
+  };
+
+  p.mouseMoved = function() {
+    updateProbe(p.mouseX, p.mouseY);
+  };
+
+  p.mouseDragged = function() {
+    updateProbe(p.mouseX, p.mouseY);
+  };
+
+  p.mouseOut = function() {
+    document.getElementById('probe').style.display='none';
+    cursorZone=-1;
+    document.getElementById('statZone').textContent='—';
+    document.getElementById('statLum').textContent='—';
+    document.getElementById('statRGB').textContent='—';
+    needsRedraw=true;
+    p.redraw();
+  };
+};
+
+function updateProbe(mx,my) {
+  if (!imgPixels||imgW===0) return;
+  const ix=Math.floor((mx-offsetX)/((scaledImgW||1)/(imgW||1)));
+  const iy=Math.floor((my-offsetY)/((scaledImgH||1)/(imgH||1)));
+  if (ix<0||iy<0||ix>=imgW||iy>=imgH) {
+    document.getElementById('probe').style.display='none';
+    cursorZone=-1;
+    p5inst.redraw();
+    return;
+  }
+  const si=(iy*imgW+ix)*4;
+  const r=imgPixels[si],g=imgPixels[si+1],b=imgPixels[si+2];
+  const lum=getLuminance(r,g,b);
+  const zone=getZone(lum);
+
+  cursorZone=zone;
+  cursorLum=Math.round(lum);
+  cursorRGB=[r,g,b];
+
+  const probe=document.getElementById('probe');
+  probe.style.display='block';
+  probe.style.left=mx+'px';
+  probe.style.top=my+'px';
+  document.getElementById('probeZone').textContent=ZONE_ROMANS[zone];
+  document.getElementById('probeName').textContent=ZONE_NAMES[zone];
+  document.getElementById('probeLum').textContent='Luminanz: '+Math.round(lum);
+
+  document.getElementById('statZone').textContent='Zone '+ZONE_ROMANS[zone]+' — '+ZONE_NAMES[zone];
+  document.getElementById('statLum').textContent=Math.round(lum)+' / 255';
+  document.getElementById('statRGB').textContent=r+' · '+g+' · '+b;
+
+  needsRedraw=true;
+  p5inst.redraw();
+}
+
+// ─── IMAGE LOADING ──────────────────────────────────────────────────────
+function loadImageURL(url) {
+  needsRedraw=true;
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=()=>{
+    // Downsample to max 900px for performance
+    const maxD=900;
+    const scale=Math.min(1,maxD/Math.max(img.width,img.height));
+    imgW=Math.round(img.width*scale);
+    imgH=Math.round(img.height*scale);
+    const off=document.createElement('canvas');
+    off.width=imgW;off.height=imgH;
+    const ctx=off.getContext('2d');
+    ctx.drawImage(img,0,0,imgW,imgH);
+    const data=ctx.getImageData(0,0,imgW,imgH);
+    imgPixels=data.data;
+    computeStats();
+    if (p5inst) {p5inst.redraw();}
+  };
+  img.onerror=()=>{
+    // Generate synthetic test image
+    imgW=800;imgH=500;
+    const off=document.createElement('canvas');
+    off.width=imgW;off.height=imgH;
+    const ctx=off.getContext('2d');
+    // Sky gradient
+    const sky=ctx.createLinearGradient(0,0,0,imgH*0.55);
+    sky.addColorStop(0,'#1a3a6a');sky.addColorStop(1,'#7aaecc');
+    ctx.fillStyle=sky;ctx.fillRect(0,0,imgW,imgH*0.55);
+    // Ground
+    const gnd=ctx.createLinearGradient(0,imgH*0.55,0,imgH);
+    gnd.addColorStop(0,'#5a8040');gnd.addColorStop(1,'#3a5a28');
+    ctx.fillStyle=gnd;ctx.fillRect(0,imgH*0.55,imgW,imgH*0.45);
+    // Sun
+    const sunGrd=ctx.createRadialGradient(600,120,0,600,120,80);
+    sunGrd.addColorStop(0,'#ffffc0');sunGrd.addColorStop(1,'rgba(255,255,200,0)');
+    ctx.fillStyle=sunGrd;ctx.fillRect(0,0,imgW,imgH);
+    // Clouds
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.beginPath();ctx.ellipse(200,100,120,40,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(250,85,80,30,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(700,140,100,35,0,0,Math.PI*2);ctx.fill();
+    // Tree silhouettes
+    ctx.fillStyle='#1a2a10';
+    for(let t=0;t<5;t++){
+      const tx=100+t*150;const th=120+Math.random()*60;
+      ctx.beginPath();ctx.moveTo(tx,imgH*0.55);
+      ctx.lineTo(tx-30,imgH*0.55-th*0.6);
+      ctx.lineTo(tx,imgH*0.55-th);
+      ctx.lineTo(tx+30,imgH*0.55-th*0.6);ctx.fill();
+    }
+    const data=ctx.getImageData(0,0,imgW,imgH);
+    imgPixels=data.data;
+    computeStats();
+    if(p5inst){p5inst.redraw();}
+  };
+  img.src=url;
+  // Show loading
+  if(p5inst){needsRedraw=true;p5inst.redraw();}
+}
+
+function computeStats() {
+  histogram=new Array(256).fill(0);
+  zoneCounts=new Array(11).fill(0);
+  let sumLum=0;
+  const total=(imgPixels.length/4);
+  for(let i=0;i<imgPixels.length;i+=4){
+    const r=imgPixels[i],g=imgPixels[i+1],b=imgPixels[i+2];
+    const lum=getLuminance(r,g,b);
+    const li=Math.min(255,Math.round(lum));
+    histogram[li]++;
+    zoneCounts[getZone(lum)]++;
+    sumLum+=lum;
+  }
+  avgLum=Math.round(sumLum/total);
+  document.getElementById('statAvg').textContent='Zone '+ZONE_ROMANS[getZone(avgLum)]+' (Ø '+avgLum+')';
+  drawHistogram();
+  buildZoneLegend();
+}
+
+// ─── HISTOGRAM ──────────────────────────────────────────────────────────
+function drawHistogram(){
+  const canvas=document.getElementById('histCanvas');
+  const w=canvas.parentElement.clientWidth-32;
+  canvas.width=w;
+  const h=canvas.height;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+
+  const max=Math.max(...histogram)*0.8; // slight clip for visual clarity
+
+  // Zone background bands
+  for(let z=0;z<11;z++){
+    const x0=Math.round(z/11*w);
+    const x1=Math.round((z+1)/11*w);
+    const hc=ZONE_HEAT[z];
+    ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.12)`;
+    ctx.fillRect(x0,0,x1-x0,h-16);
+  }
+
+  // Histogram bars
+  const barW=Math.max(1,Math.floor(w/256));
+  for(let i=0;i<256;i++){
+    const bh=Math.min(h-16,((histogram[i]||0)/max)*(h-16));
+    const x=Math.round(i/256*w);
+    // Color by zone
+    const zone=getZone(i);
+    const hc=ZONE_HEAT[zone];
+    ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.8)`;
+    ctx.fillRect(x,h-16-bh,barW,bh);
+  }
+
+  // Zone boundary lines
+  ctx.strokeStyle='rgba(200,169,126,0.5)';
+  ctx.lineWidth=1;
+  for(let z=1;z<=10;z++){
+    const x=Math.round(z/11*w);
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h-16);ctx.stroke();
+  }
+
+  // Zone labels below
+  ctx.font='9px DM Mono, monospace';
+  ctx.fillStyle='rgba(107,102,96,0.9)';
+  ctx.textAlign='center';
+  for(let z=0;z<11;z++){
+    const x=Math.round((z+0.5)/11*w);
+    ctx.fillText(ZONE_ROMANS[z],x,h-3);
+  }
+
+  // Average line
+  const avgX=Math.round(avgLum/256*w);
+  ctx.strokeStyle='rgba(200,169,126,0.9)';
+  ctx.lineWidth=1.5;
+  ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(avgX,0);ctx.lineTo(avgX,h-16);ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ─── ZONE LEGEND ────────────────────────────────────────────────────────
+function buildZoneLegend(){
+  const legend=document.getElementById('zoneLegend');
+  legend.innerHTML='';
+  const total=zoneCounts.reduce((a,b)=>a+b,0)||1;
+  const maxCount=Math.max(...zoneCounts)||1;
+
+  ZONE_ROMANS.forEach((rom,i)=>{
+    const pct=(zoneCounts[i]/total*100).toFixed(1);
+    const gv=Math.round(i/10*255);
+    const hc=ZONE_HEAT[i];
+    legend.innerHTML+=`
+      <div class="zl-item" onclick="">
+        <div class="zl-swatch" style="background:rgb(${hc[0]},${hc[1]},${hc[2]})"></div>
+        <div class="zl-gray" style="background:rgb(${gv},${gv},${gv})"></div>
+        <span class="zl-num">${rom}</span>
+        <div style="flex:1">
+          <div class="zl-name">${ZONE_NAMES[i]}</div>
+          <div class="zone-stat-bar" style="width:${(zoneCounts[i]/maxCount*100).toFixed(1)}%;background:rgb(${hc[0]},${hc[1]},${hc[2]})"></div>
+        </div>
+        <span class="zl-pct">${pct}%</span>
+      </div>`;
+  });
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────
+function setMode(mode,btn){
+  renderMode=mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels={color:'FARBE',bw:'SCHWARZ-WEISS',heat:'ZONEN-HEATMAP'};
+  document.getElementById('modeBadge').textContent=labels[mode];
+  document.getElementById('blendRow').style.opacity=mode==='heat'?'1':'0.3';
+  document.getElementById('blendRow').style.pointerEvents=mode==='heat'?'auto':'none';
+  needsRedraw=true;
+  p5inst.redraw();
+}
+
+function updateBlend(){
+  blendAmt=+document.getElementById('blendSlider').value/100;
+  document.getElementById('blendPct').textContent=Math.round(blendAmt*100)+'%';
+  needsRedraw=true;
+  p5inst.redraw();
+}
+
+function loadPreset(idx,btn){
+  document.querySelectorAll('.img-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  imgPixels=null;imgW=0;imgH=0;
+  loadImageURL(IMAGES[idx]);
+}
+
+function loadUserFile(input){
+  const file=input.files[0];if(!file)return;
+  const url=URL.createObjectURL(file);
+  document.querySelectorAll('.img-btn').forEach(b=>b.classList.remove('active'));
+  imgPixels=null;imgW=0;imgH=0;
+  loadImageURL(url);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+p5inst = new p5(sketch);
+
+// Redraw histogram on resize
+window.addEventListener('resize',()=>{
+  if(imgPixels)drawHistogram();
+});
+</script>
+</body>
+</html>

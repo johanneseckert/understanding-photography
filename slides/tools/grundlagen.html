@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schwarz-Weiß Fotografie — Interaktive Grundlagen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0c;
+    --bg2: #141414;
+    --bg3: #1c1c1c;
+    --border: #2a2a2a;
+    --border-light: #383838;
+    --text: #e8e4de;
+    --text-muted: #6b6660;
+    --text-dim: #9b9590;
+    --accent: #c8a97e;
+    --accent-dim: rgba(200, 169, 126, 0.15);
+    --white: #f0ece6;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─────────────────────────────── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(12, 12, 12, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .header-title {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  .header-title span {
+    color: var(--accent);
+  }
+
+  nav {
+    display: flex;
+    gap: 0;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 1.25rem;
+    height: 60px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    position: relative;
+  }
+
+  nav button:hover {
+    color: var(--text-dim);
+  }
+
+  nav button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  nav button .nav-num {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-bottom: 1px;
+    opacity: 0.6;
+  }
+
+  nav button.active .nav-num {
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  /* ─── SECTIONS ───────────────────────────── */
+  section {
+    display: none;
+    min-height: calc(100vh - 60px);
+    padding: 3rem 2.5rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    animation: fadeIn 0.35s ease;
+  }
+
+  section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── TYPOGRAPHY ─────────────────────────── */
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 2.6rem;
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-intro {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    max-width: 620px;
+    margin-bottom: 3rem;
+    line-height: 1.7;
+  }
+
+  h3 {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* ─── CARDS & PANELS ─────────────────────── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.75rem;
+  }
+
+  .panel + .panel {
+    margin-top: 1.25rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* ─── GRID LAYOUTS ───────────────────────── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  /* ─── CONTROLS ───────────────────────────── */
+  input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 56px;
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    background: none;
+    cursor: pointer;
+    padding: 3px;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--border-light);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+  }
+
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .range-row .range-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    width: 12px;
+    flex-shrink: 0;
+  }
+
+  .range-row input[type="range"] { flex: 1; }
+
+  .range-row .range-val {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  button.preset-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  button.preset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  button.preset-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .presets-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ─── COLOR SWATCH ───────────────────────── */
+  .swatch-large {
+    width: 100%;
+    aspect-ratio: 1.6;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    transition: background-color 0.2s;
+  }
+
+  .value-display {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    margin: 0.5rem 0 0.15rem;
+  }
+
+  .value-sub {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* ─── FORMULA DISPLAY ────────────────────── */
+  .formula {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    line-height: 2;
+  }
+
+  .formula .f-r { color: #e87070; }
+  .formula .f-g { color: #7bc47b; }
+  .formula .f-b { color: #7098e8; }
+  .formula .f-result { color: var(--accent); }
+  .formula .f-live { 
+    font-size: 1rem; 
+    color: var(--white);
+    display: block;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
+
+  /* ─── SAME LUMINANCE DEMO ────────────────── */
+  .lum-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .lum-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lum-color-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    transition: background-color 0.3s;
+  }
+
+  .lum-gray-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    transition: background-color 0.3s;
+  }
+
+  .lum-item-label {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  .lum-caption {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .lum-caption span::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+
+  .lum-caption .cap-color::before { background: #888; border: 1px solid #555; }
+  .lum-caption .cap-gray::before { background: #555; border: 1px solid #555; }
+
+  /* ─── CHANNEL MIXER ──────────────────────── */
+  .color-patch-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .color-patch {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .patch-color {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .patch-bw {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    transition: background-color 0.15s;
+  }
+
+  .patch-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  .patch-val {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .mixer-note {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-top: 1rem;
+    line-height: 1.6;
+  }
+
+  /* ─── ZONEN ──────────────────────────────── */
+  .zone-strip {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .zone-cell {
+    position: relative;
+    aspect-ratio: 0.7;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0.5rem 0.3rem 0.6rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .zone-cell:last-child { border-right: none; }
+
+  .zone-cell:hover {
+    transform: scaleY(1.03);
+    z-index: 2;
+  }
+
+  .zone-numeral {
+    font-family: var(--serif);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    display: block;
+    letter-spacing: 0.03em;
+  }
+
+  .zone-pct {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    text-align: center;
+    display: block;
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+  }
+
+  .zone-detail {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .zone-desc {
+    padding: 0.75rem 0.5rem;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .zone-desc.highlighted { border-top-color: var(--accent); }
+
+  .zone-desc-num {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .zone-desc-text {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .zone-detail-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.75rem;
+    display: none;
+  }
+
+  .zone-detail-panel.visible { display: block; }
+
+  .zone-detail-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .zone-detail-num {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .zone-detail-name {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--text-dim);
+  }
+
+  .zone-detail-body {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.75;
+    max-width: 700px;
+  }
+
+  .zone-swatch-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    float: right;
+    margin-left: 1.5rem;
+  }
+
+  .zone-exposure-demo {
+    margin-top: 2rem;
+  }
+
+  .zone-exposure-strip {
+    height: 32px;
+    border-radius: 3px;
+    background: linear-gradient(to right, #000, #fff);
+    position: relative;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .zone-exposure-cursor {
+    position: absolute;
+    top: -6px;
+    width: 2px;
+    height: 44px;
+    background: var(--accent);
+    transform: translateX(-50%);
+    transition: left 0.2s;
+  }
+
+  .zone-exposure-label {
+    position: absolute;
+    bottom: -22px;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* ─── INFO BOX ───────────────────────────── */
+  .info-box {
+    background: var(--accent-dim);
+    border: 1px solid rgba(200, 169, 126, 0.2);
+    border-radius: 3px;
+    padding: 1rem 1.25rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.65;
+    margin-top: 1rem;
+  }
+
+  .info-box strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ─── REDUCTION VIZ ──────────────────────── */
+  .reduction-demo {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .reduction-side {
+    flex: 1;
+    text-align: center;
+  }
+
+  .color-spectrum {
+    height: 40px;
+    border-radius: 3px;
+    background: linear-gradient(to right,
+      hsl(0,100%,50%), hsl(30,100%,50%), hsl(60,100%,50%),
+      hsl(90,100%,50%), hsl(120,100%,50%), hsl(150,100%,50%),
+      hsl(180,100%,50%), hsl(210,100%,50%), hsl(240,100%,50%),
+      hsl(270,100%,50%), hsl(300,100%,50%), hsl(330,100%,50%),
+      hsl(360,100%,50%));
+    border: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  .gray-spectrum {
+    height: 40px;
+    border-radius: 3px;
+    background: linear-gradient(to right, #000, #fff);
+    border: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  .spectrum-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .reduction-arrow {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* ─── SCROLLBAR ──────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">Photoclub Reutlingen — <span>Schwarz-Weiß Fotografie</span></div>
+  <nav>
+    <button class="active" onclick="showSection('lum')">
+      <span class="nav-num">01</span>
+      Farbe zu Graustufen
+    </button>
+    <button onclick="showSection('mixer')">
+      <span class="nav-num">02</span>
+      Channel Mixer
+    </button>
+    <button onclick="showSection('zonen')">
+      <span class="nav-num">03</span>
+      Zonentheorie
+    </button>
+  </nav>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+     SEKTION 1: FARBE → GRAUSTUFEN
+════════════════════════════════════════════════════ -->
+<section id="lum" class="active">
+  <div class="section-eyebrow">01 — Informationsgehalt</div>
+  <h2>Von 16 Millionen Farben<br>zu 256 Graustufen</h2>
+  <p class="section-intro">
+    Wenn ein Farbbild in Schwarz-Weiß umgewandelt wird, werden alle Farbinformationen 
+    auf einen einzigen Wert reduziert: die Helligkeit. Dabei können sehr verschiedene 
+    Farben zu identischem Grau werden — mit dramatischen Konsequenzen für die Bildwirkung.
+  </p>
+
+  <div class="two-col" style="gap: 2rem; margin-bottom: 2rem;">
+    <div>
+      <h3>Wähle eine Farbe</h3>
+      <div class="panel">
+        <span class="label">Farb-Picker</span>
+        <input type="color" id="colorPicker" value="#e84040">
+        
+        <hr class="divider" style="margin: 1.25rem 0;">
+        
+        <div class="two-col" style="gap: 1rem;">
+          <div>
+            <span class="label">Original</span>
+            <div class="swatch-large" id="colorSwatch" style="background:#e84040;"></div>
+            <div class="value-display" id="hexVal">#E84040</div>
+            <div class="value-sub" id="rgbVal">RGB 232 · 64 · 64</div>
+          </div>
+          <div>
+            <span class="label">Nach S/W-Umwandlung</span>
+            <div class="swatch-large" id="graySwatch" style="background:#6a6a6a;"></div>
+            <div class="value-display" id="lumVal">107</div>
+            <div class="value-sub">Luminanzwert (0–255)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Die Formel</h3>
+      <div class="panel">
+        <span class="label">ITU-R BT.709 — Luminanzformel</span>
+        <div class="formula">
+          L = <span class="f-r">0.2126 × R</span> + <span class="f-g">0.7152 × G</span> + <span class="f-b">0.0722 × B</span>
+          <span class="f-live" id="formulaLive">L = 0.2126 × 232 + 0.7152 × 64 + 0.0722 × 64 = 107</span>
+        </div>
+        <div class="info-box" style="margin-top:1rem;">
+          Das menschliche Auge ist <strong>am empfindlichsten für Grün</strong> (71.5%), 
+          weniger für Rot (21.2%) und kaum für Blau (7.2%). 
+          Diese Gewichtung simuliert die menschliche Wahrnehmung — nicht einfach (R+G+B)/3.
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:1rem;">
+        <span class="label">Informationsreduktion</span>
+        <div class="reduction-demo">
+          <div class="reduction-side">
+            <div class="color-spectrum"></div>
+            <div class="spectrum-label">~16.7 Millionen Farben (24 bit)</div>
+          </div>
+          <div class="reduction-arrow">→</div>
+          <div class="reduction-side">
+            <div class="gray-spectrum"></div>
+            <div class="spectrum-label">256 Graustufen (8 bit)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h3>Gleiche Helligkeit — anderer Charakter</h3>
+  <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem; max-width:620px; line-height:1.7;">
+    Diese Farben haben alle dieselbe Luminanz wie deine gewählte Farbe. 
+    Im Farbbild sind sie klar unterscheidbar — in Schwarz-Weiß werden sie identisch.
+    Das ist die zentrale Herausforderung der S/W-Fotografie.
+  </p>
+
+  <div class="panel">
+    <div class="lum-grid" id="lumGrid">
+      <!-- filled by JS -->
+    </div>
+    <div class="lum-caption" style="margin-top:1rem;">
+      <span class="cap-color">Farbe</span>
+      <span class="cap-gray">Graustufe (identisch)</span>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:1.25rem;">
+    <strong>Konsequenz für die Praxis:</strong> Ein rotes und ein grünes Objekt mit 
+    gleicher Luminanz sind im S/W-Foto nicht zu unterscheiden. Der Channel Mixer in 
+    Lightroom/Photoshop ermöglicht es, diese Beziehungen gezielt zu steuern.
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     SEKTION 2: CHANNEL MIXER
+════════════════════════════════════════════════════ -->
+<section id="mixer">
+  <div class="section-eyebrow">02 — Channel Mixer</div>
+  <h2>Farb­kanäle und ihre<br>Wirkung auf S/W</h2>
+  <p class="section-intro">
+    Der Channel Mixer in Lightroom und Photoshop gewichtet die Farbkanäle bei der 
+    S/W-Umwandlung neu. Anstatt alle Farben gleichmäßig zu behandeln, kannst du 
+    gezielt Kontraste zwischen bestimmten Farben erzeugen.
+  </p>
+
+  <div class="two-col" style="gap: 2rem; align-items: start;">
+    <div>
+      <h3>Kanal-Gewichtung</h3>
+      <div class="panel">
+        <div class="presets-row" id="presetBtns">
+          <button class="preset-btn active" onclick="applyPreset('standard',this)">Standard</button>
+          <button class="preset-btn" onclick="applyPreset('landschaft',this)">Landschaft</button>
+          <button class="preset-btn" onclick="applyPreset('portrait',this)">Portrait</button>
+          <button class="preset-btn" onclick="applyPreset('infrarot',this)">Infrarot</button>
+          <button class="preset-btn" onclick="applyPreset('highcontrast',this)">High Contrast</button>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <span class="label" style="color:#e87070;">Rot-Kanal</span>
+          <div class="range-row">
+            <span class="range-label" style="color:#e87070; width:auto; font-size:0.7rem;">R</span>
+            <input type="range" id="rSlider" min="-200" max="200" value="40" oninput="updateMixer()">
+            <span class="range-val" id="rVal">+40</span>
+          </div>
+          <span class="label" style="color:#7bc47b; margin-top:0.75rem;">Grün-Kanal</span>
+          <div class="range-row">
+            <span class="range-label" style="color:#7bc47b; width:auto; font-size:0.7rem;">G</span>
+            <input type="range" id="gSlider" min="-200" max="200" value="40" oninput="updateMixer()">
+            <span class="range-val" id="gVal">+40</span>
+          </div>
+          <span class="label" style="color:#7098e8; margin-top:0.75rem;">Blau-Kanal</span>
+          <div class="range-row">
+            <span class="range-label" style="color:#7098e8; width:auto; font-size:0.7rem;">B</span>
+            <input type="range" id="bSlider" min="-200" max="200" value="20" oninput="updateMixer()">
+            <span class="range-val" id="bVal">+20</span>
+          </div>
+        </div>
+
+        <div class="formula" style="font-size:0.78rem;">
+          S/W = <span class="f-r" id="mxR">40%</span> R 
+          + <span class="f-g" id="mxG">40%</span> G 
+          + <span class="f-b" id="mxB">20%</span> B
+          <span class="f-live" id="mxNote">Summe: 100% — ausgeglichen</span>
+        </div>
+      </div>
+
+      <div class="mixer-note" style="margin-top:1rem;" id="mixerExplain">
+        <strong style="color:var(--accent);">Standard:</strong> 
+        Ausgewogene Gewichtung — ähnlich der natürlichen Luminanzwahrnehmung.
+      </div>
+    </div>
+
+    <div>
+      <h3>Auswirkung auf Farben</h3>
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.5rem;">
+        Oben: Originalfarbe · Unten: S/W-Ergebnis mit aktuellem Channel Mix
+      </p>
+      <div class="color-patch-grid" id="patchGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     SEKTION 3: ZONENTHEORIE
+════════════════════════════════════════════════════ -->
+<section id="zonen">
+  <div class="section-eyebrow">03 — Ansel Adams</div>
+  <h2>Die Zonentheorie</h2>
+  <p class="section-intro">
+    Ansel Adams entwickelte in den 1940er Jahren das Zonensystem — eine systematische 
+    Methode um die Tonwerte einer Szene zu analysieren und die Belichtung bewusst zu planen. 
+    Der Grundgedanke: Du fotografierst nicht was du siehst, sondern welcher Zone du 
+    welchem Motivelement zuweist.
+  </p>
+
+  <div class="zone-strip" id="zoneStrip">
+    <!-- filled by JS -->
+  </div>
+
+  <p style="font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); margin-bottom:1.5rem; letter-spacing:0.06em;">
+    ↑ Klicke auf eine Zone für Details
+  </p>
+
+  <div class="zone-detail-panel" id="zoneDetailPanel">
+    <div style="display:flex; align-items:flex-start; gap:1.5rem;">
+      <div class="zone-swatch-large" id="zoneDetailSwatch"></div>
+      <div>
+        <div class="zone-detail-header">
+          <span class="zone-detail-num" id="zoneDetailNum">V</span>
+          <span class="zone-detail-name" id="zoneDetailName">Mittleres Grau</span>
+        </div>
+        <p class="zone-detail-body" id="zoneDetailBody"></p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="two-col" style="gap:2rem; align-items:start;">
+    <div>
+      <h3>Die 11 Zonen im Überblick</h3>
+      <div class="panel">
+        <div id="zoneTable" style="display:flex; flex-direction:column; gap:0;">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Die Kernprinzipien</h3>
+      <div class="panel">
+        <div style="display:flex; flex-direction:column; gap:1.25rem; font-size:0.85rem; color:var(--text-dim); line-height:1.7;">
+          <div>
+            <strong style="color:var(--text); display:block; margin-bottom:0.25rem; font-family:var(--serif); font-size:1rem; font-weight:400;">Zone V — das 18%-Grau</strong>
+            Auf diesen Wert ist jeder Belichtungsmesser kalibriert. Mittleres Grau 
+            entspricht 18% Reflektivität — der Durchschnitt einer "normalen" Szene.
+          </div>
+          <div>
+            <strong style="color:var(--text); display:block; margin-bottom:0.25rem; font-family:var(--serif); font-size:1rem; font-weight:400;">Exposure Placement</strong>
+            Anstatt auf Automatik zu vertrauen, entscheidest du: Welches Element soll 
+            in welcher Zone landen? Hautton in Zone VI, Schattendetails in Zone III.
+          </div>
+          <div>
+            <strong style="color:var(--text); display:block; margin-bottom:0.25rem; font-family:var(--serif); font-size:1rem; font-weight:400;">Zonen in Lightroom</strong>
+            Die Regler "Tiefen", "Schatten", "Mitteltöne", "Lichter" und "Weiß/Schwarz" 
+            entsprechen direkt den Zonenbereichen. Zone 0–II = Schwarz, 
+            Zone III–IV = Tiefen/Schatten, Zone V = Mitteltöne, Zone VI–VIII = Lichter, 
+            Zone IX–X = Weiß.
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top:1rem;">
+        <strong>Digitale Anwendung:</strong> Das Zonensystem entstand für analoge 
+        S/W-Fotografie. Digital wird der Spielraum durch RAW-Dateien deutlich größer — 
+        aber das konzeptionelle Denken in Zonen bleibt der beste Weg, um Tonwerte 
+        bewusst zu gestalten.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+// ─── NAVIGATION ───────────────────────────────────────
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['lum','mixer','zonen'].indexOf(id);
+  document.querySelectorAll('nav button')[idx].classList.add('active');
+}
+
+// ─── UTILS ────────────────────────────────────────────
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return [r,g,b];
+}
+
+function luminance(r,g,b) {
+  return Math.round(0.2126*r + 0.7152*g + 0.0722*b);
+}
+
+function toHex(r,g,b) {
+  return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+}
+
+function hslToRgb(h,s,l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h/30) % 12;
+  const a = s * Math.min(l, 1-l);
+  const f = n => Math.round((l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1)))) * 255);
+  return [f(0), f(8), f(4)];
+}
+
+function findColorAtLuminance(hue, targetLum) {
+  if (targetLum <= 0) return [0,0,0];
+  if (targetLum >= 255) return [255,255,255];
+  let lo = 0, hi = 100;
+  for (let i = 0; i < 25; i++) {
+    const mid = (lo+hi)/2;
+    const [r,g,b] = hslToRgb(hue, 85, mid);
+    if (luminance(r,g,b) < targetLum) lo = mid; else hi = mid;
+  }
+  return hslToRgb(hue, 85, (lo+hi)/2);
+}
+
+const romanNumerals = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+
+// ─── SEKTION 1: LUMINANZ ──────────────────────────────
+const picker = document.getElementById('colorPicker');
+
+function updateLuminance() {
+  const hex = picker.value;
+  const [r,g,b] = hexToRgb(hex);
+  const lum = luminance(r,g,b);
+  const gray = toHex(lum,lum,lum);
+
+  document.getElementById('colorSwatch').style.background = hex;
+  document.getElementById('graySwatch').style.background = gray;
+  document.getElementById('hexVal').textContent = hex.toUpperCase();
+  document.getElementById('rgbVal').textContent = `RGB ${r} · ${g} · ${b}`;
+  document.getElementById('lumVal').textContent = lum;
+  document.getElementById('formulaLive').textContent =
+    `L = 0.2126×${r} + 0.7152×${g} + 0.0722×${b} = ${lum}`;
+
+  // Same luminance grid
+  const hues = [0, 30, 60, 100, 140, 180, 210, 270];
+  const grid = document.getElementById('lumGrid');
+  grid.innerHTML = '';
+  hues.forEach(hue => {
+    const [cr,cg,cb] = findColorAtLuminance(hue, lum);
+    const clum = luminance(cr,cg,cb);
+    const cHex = toHex(cr,cg,cb);
+    const gHex = toHex(clum,clum,clum);
+    grid.innerHTML += `
+      <div class="lum-item">
+        <div class="lum-color-swatch" style="background:${cHex};"></div>
+        <div class="lum-gray-swatch" style="background:${gHex};"></div>
+        <div class="lum-item-label">${cHex.toUpperCase()}</div>
+      </div>`;
+  });
+}
+
+picker.addEventListener('input', updateLuminance);
+updateLuminance();
+
+// ─── SEKTION 2: CHANNEL MIXER ────────────────────────
+const PATCHES = [
+  { label:'Rot',     rgb:[220,40,40]  },
+  { label:'Orange',  rgb:[220,120,30] },
+  { label:'Gelb',    rgb:[210,200,40] },
+  { label:'Grün',    rgb:[50,180,60]  },
+  { label:'Cyan',    rgb:[40,180,180] },
+  { label:'Blau',    rgb:[50,80,210]  },
+  { label:'Violett', rgb:[140,50,200] },
+  { label:'Pink',    rgb:[220,80,140] },
+  { label:'Hautton', rgb:[210,160,120]},
+  { label:'Laub',    rgb:[80,130,50]  },
+];
+
+const PRESETS = {
+  standard:    { r:40,  g:40,  b:20,  note:'Ausgewogene Gewichtung — ähnlich der natürlichen Luminanzwahrnehmung.' },
+  landschaft:  { r:30,  g:60,  b:10,  note:'Mehr Grün hebt Laub und Gras hervor. Himmel und Wasser bleiben dunkel.' },
+  portrait:    { r:60,  g:30,  b:10,  note:'Rote Töne heller → Haut wirkt weicher, Äderchen verschwinden. Klassisch für Portrait.' },
+  infrarot:    { r:120, g:-20, b:-20, note:'Extreme Rötung simuliert Infrarot-Film: Laub weiß, Himmel schwarz — surrealer Look.' },
+  highcontrast:{ r:80,  g:-10, b:30,  note:'Roter Kanal stark erhöht: Rot sehr hell, Grün dunkel — maximaler Kontrast in Außenszenen.' },
+};
+
+function buildPatches() {
+  const grid = document.getElementById('patchGrid');
+  grid.innerHTML = '';
+  PATCHES.forEach((p,i) => {
+    grid.innerHTML += `
+      <div class="color-patch">
+        <div class="patch-color" style="background:${toHex(...p.rgb)};"></div>
+        <div class="patch-bw" id="patch${i}"></div>
+        <div class="patch-label">${p.label}</div>
+        <div class="patch-val" id="pval${i}">—</div>
+      </div>`;
+  });
+}
+
+function updateMixer() {
+  const r = +document.getElementById('rSlider').value;
+  const g = +document.getElementById('gSlider').value;
+  const b = +document.getElementById('bSlider').value;
+  const sum = r+g+b;
+
+  document.getElementById('rVal').textContent = (r>=0?'+':'')+r;
+  document.getElementById('gVal').textContent = (g>=0?'+':'')+g;
+  document.getElementById('bVal').textContent = (b>=0?'+':'')+b;
+  document.getElementById('mxR').textContent = r+'%';
+  document.getElementById('mxG').textContent = g+'%';
+  document.getElementById('mxB').textContent = b+'%';
+
+  const note = sum === 100 ? 'Summe: 100% — ausgeglichen'
+             : sum > 100 ? `Summe: ${sum}% — Bild heller`
+             : `Summe: ${sum}% — Bild dunkler`;
+  document.getElementById('mxNote').textContent = note;
+
+  PATCHES.forEach((p,i) => {
+    const [pr,pg,pb] = p.rgb;
+    const bw = Math.max(0,Math.min(255, Math.round((r/100)*pr + (g/100)*pg + (b/100)*pb)));
+    const hex = toHex(bw,bw,bw);
+    document.getElementById('patch'+i).style.background = hex;
+    document.getElementById('pval'+i).textContent = bw;
+  });
+}
+
+function applyPreset(name, btn) {
+  const p = PRESETS[name];
+  document.getElementById('rSlider').value = p.r;
+  document.getElementById('gSlider').value = p.g;
+  document.getElementById('bSlider').value = p.b;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mixerExplain').innerHTML =
+    `<strong style="color:var(--accent);">${btn.textContent.trim()}:</strong> ${p.note}`;
+  updateMixer();
+}
+
+buildPatches();
+updateMixer();
+
+// ─── SEKTION 3: ZONENTHEORIE ─────────────────────────
+const ZONES = [
+  { num:'0',    pct:0,   name:'Reines Schwarz',   short:'Kein Licht, keine Zeichnung',
+    detail:'Absolutes Schwarz, keine Textur, keine Zeichnung. Entspricht dem tiefsten Schatten, in dem das Filmmaterial (oder Sensor) keine Information mehr enthält. Im digitalen Histogramm: der Clip links.' },
+  { num:'I',    pct:9,   name:'Fast Schwarz',       short:'Minimalste Andeutung',
+    detail:'Sehr dunkle Töne mit kaum wahrnehmbarer Textur. Tiefste Schatten mit einer Spur Zeichnung. Bewusst eingesetzt für dramatische, geheimnisvolle Bildwirkung.' },
+  { num:'II',   pct:18,  name:'Tiefe Schatten',     short:'Erste Textur sichtbar',
+    detail:'Tiefe Schatten mit beginnender Textur. Das erste Grau, das im Druck tatsächlich differenzierte Zeichnung zeigt. Dunkler Stoff, tiefe Haar­schatten.' },
+  { num:'III',  pct:27,  name:'Untere Mitteltöne',  short:'Klare Schattenzeichnung',
+    detail:'Dunkle Mitteltöne mit vollständiger Textur und Zeichnung. Dunkles Gestein, dunkles Laub im Gegenlicht, Schatten auf Haut. Der wichtigste Schattenbereich in der Praxis.' },
+  { num:'IV',   pct:36,  name:'Dunklere Mitteltöne', short:'Dunkles Laub, Schattenpartien',
+    detail:'Mitteldunkle Töne mit reicher Textur. Dunkles Laub, nasses Holz, Schatten auf hellem Stein. Oft das "Anker-Dunkel" in Landschaftsaufnahmen.' },
+  { num:'V',    pct:50,  name:'Mittleres Grau',     short:'18%-Grau — Belichtungsmesser-Referenz',
+    detail:'Das 18%-Grau — auf diesen Wert kalibrieren alle Belichtungsmesser. Mittleres Asphalt, dunkle Haut im direkten Licht, helles Laub. Zone V ist der Ausgangspunkt aller Belichtungsentscheidungen.' },
+  { num:'VI',   pct:61,  name:'Helle Mitteltöne',   short:'Durchschnittliche helle Haut',
+    detail:'Helle Mitteltöne mit vollständiger Textur. Typischer Hautton im Schatten, heller Stein. Im Portrait ist Zone VI oft das Ziel für das Hauptlicht auf der Haut.' },
+  { num:'VII',  pct:71,  name:'Helles Grau',        short:'Haut im Licht, mit Textur',
+    detail:'Helles Grau mit noch erkennbarer Textur. Hellhäutige Haut in der Sonne, helles trockenes Gras, heller Stein in Seitenlicht. Der obere Rand des "sicheren" Bereichs.' },
+  { num:'VIII', pct:81,  name:'Sehr helle Töne',    short:'Weiß mit minimaler Textur',
+    detail:'Sehr helle Töne, fast ohne Textur. Schnee im Schatten, weißes Gewand im diffusen Licht. Noch eine Spur Zeichnung vorhanden — bei Überbelichtung verloren.' },
+  { num:'IX',   pct:91,  name:'Fast Weiß',          short:'Kaum noch Zeichnung',
+    detail:'Strahlend weiß, kaum noch wahrnehmbare Textur. Schnee im direkten Sonnenlicht, stark ausgeleuchtete weiße Flächen. Im digitalen Histogramm nahe am rechten Clip.' },
+  { num:'X',    pct:100, name:'Reines Weiß',        short:'Ausgefressen, keine Zeichnung',
+    detail:'Absolutes Weiß — kein Detail, keine Textur, keine Zeichnung. Entspricht dem "Clipping" im Histogramm rechts. Direktes Sonnenlicht, Spiegelreflexe auf Metall.' },
+];
+
+function buildZones() {
+  const strip = document.getElementById('zoneStrip');
+  strip.innerHTML = '';
+  ZONES.forEach((z,i) => {
+    const v = z.pct;
+    const textColor = v < 50 ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.65)';
+    strip.innerHTML += `
+      <div class="zone-cell" style="background:rgb(${v*2.55|0},${v*2.55|0},${v*2.55|0});"
+           onclick="showZoneDetail(${i})">
+        <span class="zone-numeral" style="color:${textColor}">${z.num}</span>
+        <span class="zone-pct" style="color:${textColor}">${z.pct}%</span>
+      </div>`;
+  });
+
+  const table = document.getElementById('zoneTable');
+  table.innerHTML = '';
+  ZONES.forEach((z,i) => {
+    const v = z.pct;
+    table.innerHTML += `
+      <div style="display:flex; align-items:center; gap:1rem; padding:0.6rem 0; border-bottom:1px solid var(--border); cursor:pointer;"
+           onclick="showZoneDetail(${i})">
+        <div style="width:32px; height:32px; border-radius:2px; background:rgb(${v*2.55|0},${v*2.55|0},${v*2.55|0}); flex-shrink:0; border:1px solid var(--border-light);"></div>
+        <span style="font-family:var(--serif); font-size:1.1rem; color:var(--text); min-width:30px;">${z.num}</span>
+        <div>
+          <div style="font-size:0.82rem; color:var(--text-dim);">${z.name}</div>
+          <div style="font-family:var(--mono); font-size:0.6rem; color:var(--text-muted);">${z.short}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function showZoneDetail(i) {
+  const z = ZONES[i];
+  const v = z.pct;
+  const panel = document.getElementById('zoneDetailPanel');
+  panel.classList.add('visible');
+  document.getElementById('zoneDetailNum').textContent = z.num;
+  document.getElementById('zoneDetailName').textContent = z.name;
+  document.getElementById('zoneDetailBody').textContent = z.detail;
+  document.getElementById('zoneDetailSwatch').style.background =
+    `rgb(${v*2.55|0},${v*2.55|0},${v*2.55|0})`;
+
+  panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+buildZones();
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schwarz-Weiß Fotografie — Interaktive Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0c0c0c; --bg2:#141414; --border:#2a2a2a;
+    --text:#e8e4de; --text-muted:#6b6660; --text-dim:#9b9590;
+    --accent:#c8a97e; --white:#f0ece6;
+    --mono:'DM Mono',monospace; --serif:'Cormorant Garamond',Georgia,serif; --sans:'DM Sans',sans-serif;
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); font-weight:300; min-height:100vh; }
+
+  .hero {
+    padding: 5rem 3rem 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family:var(--mono); font-size:0.62rem; letter-spacing:0.16em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:1rem;
+  }
+  h1 {
+    font-family:var(--serif); font-size:3.2rem; font-weight:300;
+    color:var(--white); line-height:1.1; margin-bottom:1rem;
+  }
+  .hero-sub {
+    font-size:0.9rem; color:var(--text-dim); max-width:520px; line-height:1.75;
+  }
+  .meta {
+    margin-top:1.5rem; font-family:var(--mono); font-size:0.62rem;
+    letter-spacing:0.08em; color:var(--text-muted);
+  }
+
+  .grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap:1px;
+    background:var(--border);
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+
+  .card {
+    background:var(--bg);
+    padding:2rem 2.5rem;
+    text-decoration:none;
+    display:block;
+    transition:background 0.2s;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::after {
+    content:'';
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:2px;
+    background:var(--accent);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform 0.3s ease;
+  }
+  .card:hover { background:var(--bg2); }
+  .card:hover::after { transform:scaleX(1); }
+
+  .card-num {
+    font-family:var(--mono); font-size:0.6rem; letter-spacing:0.14em;
+    color:var(--accent); margin-bottom:1.25rem; opacity:0.7;
+  }
+  .card-title {
+    font-family:var(--serif); font-size:1.5rem; font-weight:300;
+    color:var(--white); line-height:1.2; margin-bottom:0.6rem;
+  }
+  .card-desc {
+    font-size:0.8rem; color:var(--text-muted); line-height:1.65;
+    margin-bottom:1.25rem;
+  }
+  .card-tags {
+    display:flex; flex-wrap:wrap; gap:0.35rem;
+  }
+  .tag {
+    font-family:var(--mono); font-size:0.58rem; letter-spacing:0.06em;
+    color:var(--text-muted); border:1px solid var(--border);
+    padding:2px 7px; border-radius:2px;
+  }
+  .card-arrow {
+    position:absolute; top:2rem; right:2rem;
+    font-size:1.1rem; color:var(--border); transition:color 0.2s, transform 0.2s;
+  }
+  .card:hover .card-arrow { color:var(--accent); transform:translate(3px,-3px); }
+
+  footer {
+    padding:2rem 3rem; max-width:900px; margin:0 auto;
+    font-family:var(--mono); font-size:0.62rem; letter-spacing:0.06em;
+    color:var(--text-muted);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">Photoclub Reutlingen — Vortrag</div>
+  <h1>Bildbearbeitung<br>in Schwarz-Weiß</h1>
+  <p class="hero-sub">Interaktive Werkzeuge zur Veranschaulichung der theoretischen Grundlagen — von Luminanz und Farbkanälen bis zur Zonentheorie nach Ansel Adams.</p>
+  <div class="meta">4 Tools · Standalone HTML · Für Notion-Embedding optimiert</div>
+</div>
+
+<div class="grid">
+  <a class="card" href="tools/grundlagen.html" target="_blank">
+    <div class="card-num">01 · 02 · 03</div>
+    <div class="card-title">Grundlagen: Farbe, Luminanz & Zonen</div>
+    <div class="card-desc">Luminanzformel live, Channel Mixer mit Echtzeit-Vorschau, Zonentheorie nach Adams. Drei Module auf einer Seite.</div>
+    <div class="card-tags">
+      <span class="tag">Farbpicker</span>
+      <span class="tag">Channel Mixer</span>
+      <span class="tag">Zonentheorie</span>
+    </div>
+    <span class="card-arrow">↗</span>
+  </a>
+
+  <a class="card" href="tools/filter-simulation.html" target="_blank">
+    <div class="card-num">04</div>
+    <div class="card-title">Analoger Farbfilter</div>
+    <div class="card-desc">WebGL Split-View: Original vs. gefiltertes S/W in Echtzeit. Gelb, Orange, Rot, Grün, Blau, Infrarot. Teiler per Maus ziehen.</div>
+    <div class="card-tags">
+      <span class="tag">WebGL</span>
+      <span class="tag">Split-View</span>
+      <span class="tag">Eigenes Bild</span>
+    </div>
+    <span class="card-arrow">↗</span>
+  </a>
+
+  <a class="card" href="tools/zonen-analyse.html" target="_blank">
+    <div class="card-num">05</div>
+    <div class="card-title">Zonenanalyse auf echtem Foto</div>
+    <div class="card-desc">p5.js Heatmap — jeder Pixel eingefärbt nach Zone. Histogramm mit Zonengrenzen. Maus-Probe zeigt Zone und Luminanzwert.</div>
+    <div class="card-tags">
+      <span class="tag">p5.js</span>
+      <span class="tag">Heatmap</span>
+      <span class="tag">Histogramm</span>
+    </div>
+    <span class="card-arrow">↗</span>
+  </a>
+</div>
+
+<footer>
+  <span>Photoclub Reutlingen</span>
+  <span>Alle Tools: Standalone HTML — kein Server, kein Backend</span>
+</footer>
+
+</body>
+</html>

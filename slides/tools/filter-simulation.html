@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 — Farbfilter-Simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0c0c0c; --bg2:#141414; --bg3:#1c1c1c;
+    --border:#2a2a2a; --border-light:#383838;
+    --text:#e8e4de; --text-muted:#6b6660; --text-dim:#9b9590;
+    --accent:#c8a97e; --accent-dim:rgba(200,169,126,0.12);
+    --white:#f0ece6;
+    --mono:'DM Mono',monospace; --serif:'Cormorant Garamond',Georgia,serif; --sans:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
+
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(12,12,12,0.93);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:0 2rem;height:54px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .hdr-title{font-family:var(--serif);font-size:1rem;font-weight:300;color:var(--text-dim)}
+  .hdr-title span{color:var(--accent)}
+  .hdr-num{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;color:var(--text-muted)}
+
+  main{padding:2rem 2rem 3rem;max-width:1300px;margin:0 auto}
+
+  .page-head{margin-bottom:2rem}
+  .eyebrow{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem}
+  h2{font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--white);line-height:1.15;margin-bottom:0.4rem}
+  .intro{font-size:0.87rem;color:var(--text-dim);max-width:600px;line-height:1.7}
+
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:start}
+
+  /* ── sidebar ── */
+  .sidebar{display:flex;flex-direction:column;gap:1rem}
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem}
+  .label{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.6rem}
+
+  .img-btns{display:flex;flex-direction:column;gap:0.35rem}
+  .img-btn{
+    background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+    color:var(--text-dim);font-family:var(--mono);font-size:0.65rem;
+    letter-spacing:0.05em;padding:0.5rem 0.75rem;cursor:pointer;
+    text-align:left;transition:all 0.15s;
+  }
+  .img-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .img-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .img-btn input{display:none}
+
+  .filter-grid{display:flex;flex-direction:column;gap:0.3rem}
+  .filter-btn{
+    display:flex;align-items:center;gap:0.7rem;
+    background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+    color:var(--text-dim);font-family:var(--mono);font-size:0.65rem;
+    letter-spacing:0.05em;padding:0.45rem 0.75rem;cursor:pointer;
+    text-align:left;transition:all 0.15s;width:100%;
+  }
+  .filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .filter-swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.1)}
+
+  .info-box{
+    font-size:0.78rem;color:var(--text-dim);line-height:1.65;
+  }
+  .info-title{font-family:var(--serif);font-size:1rem;color:var(--text);display:block;margin-bottom:0.4rem;font-weight:400}
+  .info-physics{
+    margin-top:0.75rem;padding-top:0.75rem;
+    border-top:1px solid var(--border);
+    font-family:var(--mono);font-size:0.62rem;color:var(--text-muted);line-height:1.6;letter-spacing:0.03em
+  }
+
+  .effect-table{width:100%;border-collapse:collapse;font-size:0.7rem}
+  .effect-table td{padding:0.35rem 0;border-bottom:1px solid var(--border);color:var(--text-muted);vertical-align:middle}
+  .effect-table td:first-child{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.04em;width:80px}
+  .effect-bar-wrap{flex:1;background:var(--bg);border-radius:2px;height:6px;width:100%;overflow:hidden}
+  .effect-bar{height:6px;border-radius:2px;transition:width 0.4s ease, background 0.3s}
+
+  /* ── canvas area ── */
+  .canvas-col{display:flex;flex-direction:column;gap:0.75rem}
+  .canvas-wrap{
+    position:relative;border:1px solid var(--border);border-radius:4px;overflow:hidden;
+    cursor:col-resize;background:#111;
+    max-height:520px;
+  }
+  #glCanvas{display:block;width:100%;height:auto;max-height:520px}
+
+  .split-label{
+    position:absolute;top:12px;
+    font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;
+    text-transform:uppercase;
+    background:rgba(0,0,0,0.6);padding:3px 8px;border-radius:2px;
+    pointer-events:none;
+  }
+  .split-label.left{left:12px;color:var(--text-dim)}
+  .split-label.right{right:12px;color:var(--accent)}
+  #filterNameLabel{color:var(--accent)}
+
+  .drag-hint{
+    position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;
+    color:rgba(255,255,255,0.35);background:rgba(0,0,0,0.5);
+    padding:3px 10px;border-radius:2px;pointer-events:none;white-space:nowrap;
+    transition:opacity 0.4s;
+  }
+  .drag-hint.hidden{opacity:0}
+
+  .weights-display{
+    font-family:var(--mono);font-size:0.72rem;
+    background:var(--bg2);border:1px solid var(--border);border-radius:3px;
+    padding:0.7rem 1rem;display:flex;gap:1.5rem;align-items:center;
+    letter-spacing:0.04em;
+  }
+  .wr{color:#e87070} .wg{color:#7bc47b} .wb{color:#7098e8}
+  .wlabel{color:var(--text-muted);font-size:0.6rem;margin-right:0.25rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-title">Photoclub Reutlingen — <span>Farbfilter-Simulation</span></div>
+  <div class="hdr-num">04 — ANALOGER FILTER</div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div class="eyebrow">04 — Analoger Farbfilter</div>
+    <h2>Glasfilter vor dem Objektiv</h2>
+    <p class="intro">Analoge S/W-Fotografen steckten farbige Glasfilter vor das Objektiv. Ein Filter lässt seine eigene Farbe heller erscheinen — und dunkelt die Komplementärfarbe ab. Ziehe den Teiler zum Vergleich.</p>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+
+      <div class="panel">
+        <span class="label">Foto wählen</span>
+        <div class="img-btns">
+          <button class="img-btn active" onclick="loadPreset(0,this)">Berglandschaft</button>
+          <button class="img-btn" onclick="loadPreset(1,this)">Küstenlandschaft</button>
+          <button class="img-btn" onclick="loadPreset(2,this)">Stadtszene</button>
+          <label class="img-btn" style="cursor:pointer">
+            Eigenes Bild hochladen
+            <input type="file" accept="image/*" onchange="loadUserFile(this)">
+          </label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <span class="label">Farbfilter</span>
+        <div class="filter-grid" id="filterGrid"></div>
+      </div>
+
+      <div class="panel" id="infoPanel">
+        <span class="info-title" id="infoTitle">Kein Filter</span>
+        <div class="info-box" id="infoText">Standard-Luminanzformel nach ITU-R BT.709.</div>
+        <div class="info-physics" id="infoPhysics"></div>
+      </div>
+
+      <div class="panel">
+        <span class="label">Szene-Effekte</span>
+        <table class="effect-table" id="effectTable"></table>
+      </div>
+
+    </div>
+
+    <div class="canvas-col">
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="glCanvas"></canvas>
+        <div class="split-label left">ORIGINAL</div>
+        <div class="split-label right" id="filterNameLabel">KEIN FILTER</div>
+        <div class="drag-hint" id="dragHint">← Teiler ziehen →</div>
+      </div>
+      <div class="weights-display">
+        <span><span class="wlabel">Kanal-Mix</span></span>
+        <span class="wr"><span class="wlabel">R</span><span id="wR">21.3%</span></span>
+        <span class="wg"><span class="wlabel">G</span><span id="wG">71.5%</span></span>
+        <span class="wb"><span class="wlabel">B</span><span id="wB">7.2%</span></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────
+const IMAGES = [
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000&q=80&fit=crop',
+  'https://images.unsplash.com/photo-1439853949212-36589f9bfa27?w=1000&q=80&fit=crop',
+  'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1000&q=80&fit=crop',
+];
+
+const FILTERS = [
+  { id:'none',   name:'Kein Filter',  r:0.2126, g:0.7152, b:0.0722, color:'#888',
+    title:'Standard-Luminanz (BT.709)',
+    info:'Die natürliche Helligkeitswahrnehmung. Das Auge ist am empfindlichsten für Grün (71.5%), dann Rot (21.3%), kaum für Blau (7.2%).',
+    physics:'Keine optische Filterung. Software-Luminanzformel.',
+    effects:[['Himmel',0.5],['Wolken',0.85],['Laub',0.55],['Rote Blüten',0.35],['Haut',0.65]] },
+  { id:'yellow', name:'Gelbfilter',   r:0.50,   g:0.42,   b:0.08,   color:'#f0d830',
+    title:'Gelbfilter — leicht & natürlich',
+    info:'Klassiker für Landschaft. Lässt Blau leicht abdunkeln — blauer Himmel bekommt mehr Kontrast zu weißen Wolken. Mild und natürlich wirkend.',
+    physics:'Transmittiert Rot + Grün → Gelb. Blockiert ~92% des Blaulichts.',
+    effects:[['Himmel',0.38],['Wolken',0.85],['Laub',0.58],['Rote Blüten',0.62],['Haut',0.68]] },
+  { id:'orange', name:'Orangefilter', r:0.65,   g:0.28,   b:0.07,   color:'#f07820',
+    title:'Orangefilter — Kontrast & Drama',
+    info:'Stärker als Gelb. Himmel wird deutlich dunkler, Wolken stehen weiß heraus. Rote Hauttöne werden heller — ideal für Portrait. Häufig in der klassischen Reportage.',
+    physics:'Transmittiert Rot + Teile Grün. Blockiert ~93% Blau + Grün-Anteile.',
+    effects:[['Himmel',0.28],['Wolken',0.88],['Laub',0.50],['Rote Blüten',0.78],['Haut',0.72]] },
+  { id:'red',    name:'Rotfilter',    r:0.88,   g:0.09,   b:0.03,   color:'#d02020',
+    title:'Rotfilter — maximaler Kontrast',
+    info:'Dramatischster Effekt: Blauer Himmel wird fast schwarz, Wolken leuchten. Ansel Adams\' Favorit für dramatische Landschaften. Grünes Laub wird mittelgrau.',
+    physics:'Nur Rotlicht passiert (~590–700nm). Blockiert ~97% Blau, ~91% Grün.',
+    effects:[['Himmel',0.12],['Wolken',0.90],['Laub',0.35],['Rote Blüten',0.92],['Haut',0.78]] },
+  { id:'green',  name:'Grünfilter',   r:0.08,   g:0.84,   b:0.08,   color:'#30b830',
+    title:'Grünfilter — Natur & Vegetation',
+    info:'Laub und Vegetation werden aufgehellt, Rotes verdunkelt sich. Ideal für Waldaufnahmen, botanische Fotografie. Haut wirkt unnatürlich — rauer, mit sichtbaren Unreinheiten.',
+    physics:'Nur grünes Licht (~490–580nm). Blockiert Rot + Blau stark.',
+    effects:[['Himmel',0.40],['Wolken',0.82],['Laub',0.85],['Rote Blüten',0.15],['Haut',0.50]] },
+  { id:'blue',   name:'Blaufilter',   r:0.06,   g:0.10,   b:0.84,   color:'#3060d8',
+    title:'Blaufilter — atmosphärisch & selten',
+    info:'Selten in der Landschaft. Dunstiger Look, Fernsicht heller. Haut wird sehr rau — alle Texturen und Poren werden betont. Himmel erscheint heller.',
+    physics:'Nur blaues Licht (~400–490nm). Transmittiert UV-Anteile.',
+    effects:[['Himmel',0.75],['Wolken',0.80],['Laub',0.25],['Rote Blüten',0.08],['Haut',0.45]] },
+  { id:'ir',     name:'Infrarot-Sim', r:0.96,   g:0.03,   b:0.01,   color:'#2a0000',
+    title:'Infrarot-Simulation',
+    info:'Simuliert Infrarot-Film (Kodak HIE, Agfa Copex). Laub reflektiert Infrarot stark → wird fast weiß. Himmel: fast schwarz. Surrealer, traumhafter Look. Lith-Drucke in der Dunkelkammer.',
+    physics:'Infrarot-Film reagiert auf 700–900nm. Nur roter Kanal approximiert IR-Effekte.',
+    effects:[['Himmel',0.05],['Wolken',0.92],['Laub',0.95],['Rote Blüten',0.98],['Haut',0.85]] },
+];
+
+const SCENE_LABELS = ['Himmel','Wolken','Laub','Rote Blüten','Haut'];
+const SCENE_COLORS = ['#4080c0','#ddd','#308030','#c03030','#e0a070'];
+
+// ─── WEBGL SETUP ──────────────────────────────────────────────────────────
+const canvas = document.getElementById('glCanvas');
+const gl = canvas.getContext('webgl', {antialias:false});
+
+const VERT = `
+  attribute vec2 aPos;
+  attribute vec2 aUV;
+  varying vec2 vUV;
+  void main(){gl_Position=vec4(aPos,0.0,1.0);vUV=aUV;}
+`;
+const FRAG = `
+  precision highp float;
+  uniform sampler2D uTex;
+  uniform vec3 uW;
+  uniform float uSplit;
+  uniform float uCW;
+  varying vec2 vUV;
+  void main(){
+    vec4 c=texture2D(uTex,vUV);
+    float bw=clamp(dot(c.rgb,uW),0.0,1.0);
+    float d=abs(vUV.x-uSplit);
+    float lw=2.0/uCW;
+    if(d<lw){gl_FragColor=vec4(0.78,0.66,0.49,1.0);return;}
+    if(vUV.x<uSplit){gl_FragColor=c;}
+    else{gl_FragColor=vec4(bw,bw,bw,1.0);}
+  }
+`;
+
+function mkShader(type,src){
+  const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(s));return null;}
+  return s;
+}
+function mkProg(vs,fs){
+  const p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS)){console.error(gl.getProgramInfoLog(p));return null;}
+  return p;
+}
+
+const prog = mkProg(mkShader(gl.VERTEX_SHADER,VERT), mkShader(gl.FRAGMENT_SHADER,FRAG));
+const aPos = gl.getAttribLocation(prog,'aPos');
+const aUV  = gl.getAttribLocation(prog,'aUV');
+const uTex   = gl.getUniformLocation(prog,'uTex');
+const uW     = gl.getUniformLocation(prog,'uW');
+const uSplit = gl.getUniformLocation(prog,'uSplit');
+const uCW    = gl.getUniformLocation(prog,'uCW');
+
+// Full-screen quad: pos(2) + uv(2)
+const verts = new Float32Array([
+  -1,-1, 0,0,
+   1,-1, 1,0,
+  -1, 1, 0,1,
+   1, 1, 1,1,
+]);
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D,tex);
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([40,40,40,255]));
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let split = 0.5;
+let dragging = false;
+let currentFilter = FILTERS[0];
+let imgLoaded = false;
+
+// ─── RENDER ───────────────────────────────────────────────────────────────
+function render(){
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,16,0);
+  gl.enableVertexAttribArray(aUV);
+  gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,16,8);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.uniform1i(uTex,0);
+  gl.uniform3f(uW,currentFilter.r,currentFilter.g,currentFilter.b);
+  gl.uniform1f(uSplit,split);
+  gl.uniform1f(uCW,canvas.width);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+}
+
+// ─── IMAGE LOADING ────────────────────────────────────────────────────────
+function loadImageURL(url){
+  imgLoaded=false;
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=()=>{
+    // Resize canvas to image aspect ratio
+    const wrap=document.getElementById('canvasWrap');
+    const maxW=wrap.clientWidth||800;
+    const maxH=500;
+    const scale=Math.min(maxW/img.width, maxH/img.height);
+    canvas.width=Math.round(img.width*scale);
+    canvas.height=Math.round(img.height*scale);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    imgLoaded=true;
+    render();
+  };
+  img.onerror=()=>{
+    // Fallback: generate a gradient image
+    const offscreen=document.createElement('canvas');
+    offscreen.width=800;offscreen.height=500;
+    const ctx=offscreen.getContext('2d');
+    const grd=ctx.createLinearGradient(0,0,800,500);
+    grd.addColorStop(0,'#3060a0');grd.addColorStop(0.4,'#8cc0e0');
+    grd.addColorStop(0.5,'#c0d8a0');grd.addColorStop(1,'#608040');
+    ctx.fillStyle=grd;ctx.fillRect(0,0,800,500);
+    ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fillRect(150,80,500,80);
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(300,50,200,60);
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,offscreen);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    canvas.width=800;canvas.height=500;
+    imgLoaded=true;
+    render();
+  };
+  img.src=url;
+}
+
+function loadPreset(idx,btn){
+  document.querySelectorAll('.img-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadImageURL(IMAGES[idx]);
+}
+
+function loadUserFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  const url=URL.createObjectURL(file);
+  document.querySelectorAll('.img-btn').forEach(b=>b.classList.remove('active'));
+  loadImageURL(url);
+}
+
+// ─── FILTER UI ────────────────────────────────────────────────────────────
+function applyFilter(f){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fb-'+f.id).classList.add('active');
+  document.getElementById('filterNameLabel').textContent=f.name.toUpperCase();
+  document.getElementById('infoTitle').textContent=f.title;
+  document.getElementById('infoText').textContent=f.info;
+  document.getElementById('infoPhysics').textContent=f.physics;
+  const total=f.r+f.g+f.b;
+  document.getElementById('wR').textContent=Math.round(f.r/total*1000)/10+'%';
+  document.getElementById('wG').textContent=Math.round(f.g/total*1000)/10+'%';
+  document.getElementById('wB').textContent=Math.round(f.b/total*1000)/10+'%';
+  buildEffectTable(f);
+  render();
+}
+
+function buildFilterGrid(){
+  const grid=document.getElementById('filterGrid');
+  FILTERS.forEach(f=>{
+    const btn=document.createElement('button');
+    btn.className='filter-btn'+(f.id==='none'?' active':'');
+    btn.id='fb-'+f.id;
+    btn.innerHTML=`<span class="filter-swatch" style="background:${f.color}"></span>${f.name}`;
+    btn.onclick=()=>applyFilter(f);
+    grid.appendChild(btn);
+  });
+}
+
+function buildEffectTable(f){
+  const tbl=document.getElementById('effectTable');
+  tbl.innerHTML='';
+  f.effects.forEach(([name,val],i)=>{
+    const none=FILTERS[0].effects[i][1];
+    const pct=Math.round(val*100);
+    const nonePct=Math.round(none*100);
+    const diff=pct-nonePct;
+    const diffStr=(diff>=0?'+':'')+diff+'%';
+    const diffCol=diff>0?'#7bc47b':diff<0?'#e87070':'#888';
+    tbl.innerHTML+=`
+      <tr>
+        <td><span style="display:inline-block;width:8px;height:8px;background:${SCENE_COLORS[i]};border-radius:1px;margin-right:4px;vertical-align:middle"></span>${name}</td>
+        <td>
+          <div class="effect-bar-wrap">
+            <div class="effect-bar" style="width:${pct}%;background:rgb(${Math.round(val*255)},${Math.round(val*255)},${Math.round(val*255)})"></div>
+          </div>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);font-size:0.6rem;color:${diffCol};padding-left:6px;width:36px">${diffStr}</td>
+      </tr>`;
+  });
+}
+
+// ─── SPLIT DRAG ───────────────────────────────────────────────────────────
+const wrap=document.getElementById('canvasWrap');
+const hint=document.getElementById('dragHint');
+let hintHidden=false;
+
+function getSplit(e){
+  const r=canvas.getBoundingClientRect();
+  const clientX=e.touches?e.touches[0].clientX:e.clientX;
+  return Math.max(0.02,Math.min(0.98,(clientX-r.left)/r.width));
+}
+
+canvas.addEventListener('mousedown',e=>{dragging=true;split=getSplit(e);render();});
+canvas.addEventListener('touchstart',e=>{dragging=true;split=getSplit(e);render();},{passive:true});
+window.addEventListener('mousemove',e=>{
+  if(!dragging)return;
+  split=getSplit(e);
+  if(!hintHidden){hint.classList.add('hidden');hintHidden=true;}
+  render();
+});
+window.addEventListener('touchmove',e=>{
+  if(!dragging)return;
+  split=getSplit(e);render();
+},{passive:true});
+window.addEventListener('mouseup',()=>dragging=false);
+window.addEventListener('touchend',()=>dragging=false);
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+buildFilterGrid();
+buildEffectTable(FILTERS[0]);
+loadImageURL(IMAGES[0]);
+</script>
+</body>
+</html>
