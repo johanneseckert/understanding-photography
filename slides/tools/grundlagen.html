@@ -63,6 +63,8 @@
   .header-title span {
     color: var(--accent);
   }
+  .back-link{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+  .back-link:hover{color:var(--accent)}
 
   nav {
     display: flex;
@@ -703,6 +705,7 @@
 <body>
 
 <header>
+  <a class="back-link" href="../index.html">← Übersicht</a>
   <div class="header-title">Photoclub Reutlingen — <span>Schwarz-Weiß Fotografie</span></div>
   <nav>
     <button class="active" onclick="showSection('lum')">
