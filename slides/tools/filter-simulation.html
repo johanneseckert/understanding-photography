@@ -16,14 +16,14 @@
     --mono:'DM Mono',monospace; --serif:'Cormorant Garamond',Georgia,serif; --sans:'DM Sans',sans-serif;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{font-size:16px}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;display:flex;flex-direction:column}
 
   header{
-    position:sticky;top:0;z-index:100;
-    background:rgba(12,12,12,0.93);backdrop-filter:blur(12px);
+    flex-shrink:0;z-index:100;
+    background:rgba(12,12,12,0.97);
     border-bottom:1px solid var(--border);
-    padding:0 2rem;height:54px;
+    padding:0 1.25rem;height:46px;
     display:flex;align-items:center;justify-content:space-between;
   }
   .hdr-title{font-family:var(--serif);font-size:1rem;font-weight:300;color:var(--text-dim)}
@@ -32,18 +32,13 @@
   .back-link{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
   .back-link:hover{color:var(--accent)}
 
-  main{padding:2rem 2rem 3rem;max-width:1300px;margin:0 auto}
+  main{flex:1;min-height:0;overflow:hidden;padding:0.6rem;display:flex;flex-direction:column}
 
-  .page-head{margin-bottom:2rem}
-  .eyebrow{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem}
-  h2{font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--white);line-height:1.15;margin-bottom:0.4rem}
-  .intro{font-size:0.87rem;color:var(--text-dim);max-width:600px;line-height:1.7}
-
-  .layout{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:start}
+  .layout{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:240px 1fr;gap:0.75rem;align-items:stretch}
 
   /* ── sidebar ── */
-  .sidebar{display:flex;flex-direction:column;gap:1rem}
-  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem}
+  .sidebar{display:flex;flex-direction:column;gap:0.5rem;overflow-y:auto;min-height:0}
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:0.9rem}
   .label{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.6rem}
 
   .img-btns{display:flex;flex-direction:column;gap:0.35rem}
@@ -86,13 +81,12 @@
   .effect-bar{height:6px;border-radius:2px;transition:width 0.4s ease, background 0.3s}
 
   /* ── canvas area ── */
-  .canvas-col{display:flex;flex-direction:column;gap:0.75rem}
+  .canvas-col{display:flex;flex-direction:column;gap:0.5rem;min-height:0;overflow:hidden}
   .canvas-wrap{
     position:relative;border:1px solid var(--border);border-radius:4px;overflow:hidden;
-    cursor:col-resize;background:#111;
-    max-height:520px;
+    cursor:col-resize;background:#111;flex:1;min-height:0;
   }
-  #glCanvas{display:block;width:100%;height:auto;max-height:520px}
+  #glCanvas{display:block;width:100%;height:auto}
 
   .split-label{
     position:absolute;top:12px;
@@ -150,12 +144,6 @@
 </header>
 
 <main>
-  <div class="page-head">
-    <div class="eyebrow">04 — Analoger Farbfilter</div>
-    <h2>Glasfilter vor dem Objektiv</h2>
-    <p class="intro">Analoge S/W-Fotografen steckten farbige Glasfilter vor das Objektiv. Ein Filter lässt seine eigene Farbe heller erscheinen — und dunkelt die Komplementärfarbe ab. Ziehe den Teiler zum Vergleich.</p>
-  </div>
-
   <div class="layout">
     <div class="sidebar">
 
@@ -350,7 +338,7 @@ function render(){
   gl.uniform1i(uTex,0);
   gl.uniform3f(uW,currentFilter.r,currentFilter.g,currentFilter.b);
   gl.uniform1f(uSplit,split);
-  gl.uniform1f(uCW,canvas.width);
+  gl.uniform1f(uCW,canvas.width); // physical pixels — correct for split-line calc
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
 }
 
@@ -360,13 +348,17 @@ function loadImageURL(url){
   const img=new Image();
   img.crossOrigin='anonymous';
   img.onload=()=>{
-    // Resize canvas to image aspect ratio
     const wrap=document.getElementById('canvasWrap');
+    const dpr=window.devicePixelRatio||1;
     const maxW=wrap.clientWidth||800;
-    const maxH=500;
+    const maxH=wrap.clientHeight||600;
     const scale=Math.min(maxW/img.width, maxH/img.height);
-    canvas.width=Math.round(img.width*scale);
-    canvas.height=Math.round(img.height*scale);
+    const cssW=Math.round(img.width*scale);
+    const cssH=Math.round(img.height*scale);
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    canvas.style.width=cssW+'px';
+    canvas.style.height=cssH+'px';
     gl.bindTexture(gl.TEXTURE_2D,tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);

@@ -336,7 +336,7 @@ const sketch = function(p) {
     const cnv = p.createCanvas(canvasDisplayW, canvasDisplayH);
     cnv.parent('p5-canvas-holder');
     p.noLoop();
-    p.pixelDensity(1);
+    p.pixelDensity(window.devicePixelRatio||1);
     p.noStroke();
     loadImageURL(IMAGES[0]);
   };
@@ -545,13 +545,18 @@ function toggleCompensate(){
 function drawHistogram(){
   const canvas=document.getElementById('histCanvas');
   const wrap=document.getElementById('histWrap');
+  const dpr=window.devicePixelRatio||1;
   const w=wrap.clientWidth||260;
-  canvas.width=w;
-  const h=canvas.height;
+  const h=canvas.clientHeight||110;
+  canvas.width=Math.round(w*dpr);
+  canvas.height=Math.round(h*dpr);
+  canvas.style.width=w+'px';
+  canvas.style.height=h+'px';
   const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
   ctx.clearRect(0,0,w,h);
 
-  const chartH=h-14;
+  const chartH=h-14; // h is CSS pixels, ctx is scaled
   const barW=Math.max(1,Math.floor(w/256));
   const total=histogram.reduce((a,b)=>a+b,0)||1;
 
@@ -611,6 +616,11 @@ function drawHistogram(){
   ctx.setLineDash([4,3]);
   ctx.beginPath();ctx.moveTo(avgX,0);ctx.lineTo(avgX,chartH);ctx.stroke();
   ctx.setLineDash([]);
+  // Average label
+  ctx.font='bold 8px DM Mono, monospace';
+  ctx.fillStyle='rgba(200,169,126,0.9)';
+  ctx.textAlign = avgX > w*0.6 ? 'right' : 'left';
+  ctx.fillText('Ø '+ZONE_ROMANS[getZone(avgLum)], avgX + (avgX > w*0.6 ? -4 : 4), 10);
 
   const clip0=histogram[0]/total*100;
   const clip255=histogram[255]/total*100;
