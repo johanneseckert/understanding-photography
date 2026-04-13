@@ -114,6 +114,18 @@
     background:var(--accent);transition:width 0.6s ease;
   }
 
+  /* histogram wrapper */
+  .hist-wrap{position:relative}
+  .hist-cursor{
+    position:absolute;top:0;bottom:16px;width:1px;
+    pointer-events:none;display:none;
+    background:rgba(255,255,255,0.55);
+  }
+  .hist-comp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem}
+  .hist-comp-label{display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none}
+  .hist-comp-label input{accent-color:var(--accent);width:13px;height:13px;cursor:pointer}
+  .hist-comp-label span{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;color:var(--text-muted)}
+
   /* status bar */
   .status-bar{
     display:flex;gap:2rem;align-items:center;
@@ -189,9 +201,18 @@
 
   <div class="bottom-grid">
     <div>
-      <span class="label">Histogramm — Luminanzverteilung mit Zonengrenzen</span>
+      <div class="hist-comp-row">
+        <span class="label" style="margin:0">Histogramm — Luminanzverteilung mit Zonengrenzen</span>
+        <label class="hist-comp-label">
+          <input type="checkbox" id="compensateCheck" onchange="toggleCompensate()">
+          <span>Extremwerte kompensieren</span>
+        </label>
+      </div>
       <div class="panel" style="padding:1rem;">
-        <canvas id="histCanvas" height="140"></canvas>
+        <div class="hist-wrap" id="histWrap">
+          <canvas id="histCanvas" height="140"></canvas>
+          <div class="hist-cursor" id="histCursor"></div>
+        </div>
         <div id="zoneBarLegend" style="display:flex;margin-top:4px;"></div>
       </div>
     </div>
@@ -372,6 +393,7 @@ const sketch = function(p) {
 
   p.mouseOut = function() {
     document.getElementById('probe').style.display='none';
+    document.getElementById('histCursor').style.display='none';
     cursorZone=-1;
     document.getElementById('statZone').textContent='—';
     document.getElementById('statLum').textContent='—';
@@ -411,6 +433,15 @@ function updateProbe(mx,my) {
   document.getElementById('statZone').textContent='Zone '+ZONE_ROMANS[zone]+' — '+ZONE_NAMES[zone];
   document.getElementById('statLum').textContent=Math.round(lum)+' / 255';
   document.getElementById('statRGB').textContent=r+' · '+g+' · '+b;
+
+  // Histogram cursor
+  const histCanvas=document.getElementById('histCanvas');
+  const histCursor=document.getElementById('histCursor');
+  const hcw=histCanvas.clientWidth||histCanvas.width;
+  const hc=ZONE_HEAT[zone];
+  histCursor.style.display='block';
+  histCursor.style.left=Math.round(lum/255*hcw)+'px';
+  histCursor.style.background=`rgba(${hc[0]},${hc[1]},${hc[2]},0.8)`;
 
   needsRedraw=true;
   p5inst.redraw();
@@ -499,6 +530,13 @@ function computeStats() {
 }
 
 // ─── HISTOGRAM ──────────────────────────────────────────────────────────
+let compensate = false;
+
+function toggleCompensate(){
+  compensate = document.getElementById('compensateCheck').checked;
+  drawHistogram();
+}
+
 function drawHistogram(){
   const canvas=document.getElementById('histCanvas');
   const w=canvas.parentElement.clientWidth-32;
@@ -507,35 +545,59 @@ function drawHistogram(){
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,w,h);
 
-  const max=Math.max(...histogram)*0.8; // slight clip for visual clarity
+  const chartH = h-16;
+  const barW = Math.max(1, Math.floor(w/256));
+  const total = histogram.reduce((a,b)=>a+b,0)||1;
+
+  // Max: when compensating exclude bins 0 and 255
+  const innerMax = compensate
+    ? Math.max(...histogram.slice(1,255), 1)
+    : Math.max(...histogram, 1);
+  const max = innerMax * 0.85;
 
   // Zone background bands
   for(let z=0;z<11;z++){
-    const x0=Math.round(z/11*w);
-    const x1=Math.round((z+1)/11*w);
+    const x0=Math.round(z/11*w), x1=Math.round((z+1)/11*w);
     const hc=ZONE_HEAT[z];
     ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.12)`;
-    ctx.fillRect(x0,0,x1-x0,h-16);
+    ctx.fillRect(x0,0,x1-x0,chartH);
   }
 
   // Histogram bars
-  const barW=Math.max(1,Math.floor(w/256));
   for(let i=0;i<256;i++){
-    const bh=Math.min(h-16,((histogram[i]||0)/max)*(h-16));
-    const x=Math.round(i/256*w);
-    // Color by zone
-    const zone=getZone(i);
-    const hc=ZONE_HEAT[zone];
-    ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.8)`;
-    ctx.fillRect(x,h-16-bh,barW,bh);
+    const cnt = histogram[i]||0;
+    if(!cnt) continue;
+    const x = Math.round(i/256*w);
+    const zone = getZone(i);
+    const hc = ZONE_HEAT[zone];
+    const isExtreme = compensate && (i===0||i===255);
+
+    if(isExtreme){
+      // Overflow bar: full height, reduced opacity + hatch
+      ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.35)`;
+      ctx.fillRect(x, 0, barW, chartH);
+      // Diagonal hatch
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x,0,barW,chartH); ctx.clip();
+      ctx.strokeStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.6)`;
+      ctx.lineWidth=1;
+      for(let y=-chartH;y<chartH+barW;y+=5){
+        ctx.beginPath();ctx.moveTo(x+y,0);ctx.lineTo(x+y+chartH,chartH);ctx.stroke();
+      }
+      ctx.restore();
+    } else {
+      const bh = Math.min(chartH, (cnt/max)*chartH);
+      ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.85)`;
+      ctx.fillRect(x, chartH-bh, barW, bh);
+    }
   }
 
   // Zone boundary lines
-  ctx.strokeStyle='rgba(200,169,126,0.5)';
+  ctx.strokeStyle='rgba(200,169,126,0.45)';
   ctx.lineWidth=1;
   for(let z=1;z<=10;z++){
     const x=Math.round(z/11*w);
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h-16);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,chartH);ctx.stroke();
   }
 
   // Zone labels below
@@ -543,8 +605,7 @@ function drawHistogram(){
   ctx.fillStyle='rgba(107,102,96,0.9)';
   ctx.textAlign='center';
   for(let z=0;z<11;z++){
-    const x=Math.round((z+0.5)/11*w);
-    ctx.fillText(ZONE_ROMANS[z],x,h-3);
+    ctx.fillText(ZONE_ROMANS[z], Math.round((z+0.5)/11*w), h-3);
   }
 
   // Average line
@@ -552,8 +613,24 @@ function drawHistogram(){
   ctx.strokeStyle='rgba(200,169,126,0.9)';
   ctx.lineWidth=1.5;
   ctx.setLineDash([4,3]);
-  ctx.beginPath();ctx.moveTo(avgX,0);ctx.lineTo(avgX,h-16);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(avgX,0);ctx.lineTo(avgX,chartH);ctx.stroke();
   ctx.setLineDash([]);
+
+  // Clipping labels (always shown)
+  const clip0 = histogram[0]/total*100;
+  const clip255 = histogram[255]/total*100;
+  ctx.font='bold 9px DM Mono, monospace';
+  ctx.textAlign='left';
+  const hc0=ZONE_HEAT[0], hc10=ZONE_HEAT[10];
+  if(clip0>0.05){
+    ctx.fillStyle=`rgba(${hc0[0]},${hc0[1]},${hc0[2]},0.9)`;
+    ctx.fillText(clip0.toFixed(1)+'%', 3, 11);
+  }
+  if(clip255>0.05){
+    ctx.textAlign='right';
+    ctx.fillStyle=`rgba(${hc10[0]},${hc10[1]},${hc10[2]},0.9)`;
+    ctx.fillText(clip255.toFixed(1)+'%', w-3, 11);
+  }
 }
 
 // ─── ZONE LEGEND ────────────────────────────────────────────────────────
