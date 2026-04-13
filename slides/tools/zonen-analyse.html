@@ -17,133 +17,155 @@
     --mono:'DM Mono',monospace;--serif:'Cormorant Garamond',Georgia,serif;--sans:'DM Sans',sans-serif;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{font-size:16px}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;display:flex;flex-direction:column}
 
+  /* ── header ── */
   header{
-    position:sticky;top:0;z-index:200;
-    background:rgba(12,12,12,0.93);backdrop-filter:blur(12px);
+    flex-shrink:0;z-index:200;
+    background:rgba(12,12,12,0.97);
     border-bottom:1px solid var(--border);
-    padding:0 2rem;height:54px;
+    padding:0 1.25rem;height:46px;
     display:flex;align-items:center;justify-content:space-between;
   }
-  .hdr-title{font-family:var(--serif);font-size:1rem;font-weight:300;color:var(--text-dim)}
+  .hdr-title{font-family:var(--serif);font-size:0.95rem;font-weight:300;color:var(--text-dim);text-align:center}
   .hdr-title span{color:var(--accent)}
-  .hdr-num{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;color:var(--text-muted)}
-  .back-link{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+  .back-link{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--text-muted);text-decoration:none;transition:color 0.15s;min-width:80px}
   .back-link:hover{color:var(--accent)}
+  .hdr-num{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;color:var(--text-muted);min-width:80px;text-align:right}
 
-  main{padding:2rem 2rem 3rem;max-width:1300px;margin:0 auto}
-  .eyebrow{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem}
-  h2{font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--white);line-height:1.15;margin-bottom:0.4rem}
-  .intro{font-size:0.87rem;color:var(--text-dim);max-width:660px;line-height:1.7;margin-bottom:2rem}
+  /* ── app shell ── */
+  .app-shell{flex:1;display:flex;overflow:hidden;min-height:0;padding:0.6rem;gap:0}
 
-  .label{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem}
-  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem}
+  /* ── left column ── */
+  .col-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.4rem;overflow:hidden}
 
-  /* controls row */
-  .controls-row{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
-
-  .img-btn,.mode-btn{
-    background:var(--bg3);border:1px solid var(--border);border-radius:3px;
-    color:var(--text-dim);font-family:var(--mono);font-size:0.65rem;
-    letter-spacing:0.05em;padding:0.45rem 0.9rem;cursor:pointer;transition:all 0.15s;
-  }
-  .img-btn:hover,.mode-btn:hover{border-color:var(--accent);color:var(--accent)}
-  .img-btn.active,.mode-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
-  .img-btn input{display:none}
-
-  .divider-v{width:1px;height:28px;background:var(--border)}
-
-  /* canvas container */
   .canvas-container{
+    flex:1;min-height:0;
     position:relative;
     border:1px solid var(--border);border-radius:4px;overflow:hidden;
-    background:#111;
-    margin-bottom:1rem;
-    cursor:crosshair;
+    background:#111;cursor:crosshair;
   }
-  #p5-canvas-holder{display:block}
+  #p5-canvas-holder{width:100%;height:100%}
   #p5-canvas-holder canvas{display:block!important}
 
   /* probe overlay */
-  .probe{
-    position:absolute;pointer-events:none;
-    display:none;
-    z-index:10;
-  }
+  .probe{position:absolute;pointer-events:none;display:none;z-index:10}
   .probe-inner{
     background:rgba(0,0,0,0.82);border:1px solid var(--accent);border-radius:3px;
-    padding:0.5rem 0.75rem;
-    font-family:var(--mono);font-size:0.68rem;color:var(--white);
-    letter-spacing:0.04em;white-space:nowrap;
-    transform:translate(12px,-50%);
+    padding:0.5rem 0.75rem;font-family:var(--mono);font-size:0.68rem;color:var(--white);
+    letter-spacing:0.04em;white-space:nowrap;transform:translate(12px,-50%);
   }
   .probe-zone-num{font-family:var(--serif);font-size:1.4rem;color:var(--accent);line-height:1}
   .probe-lum{color:var(--text-muted);font-size:0.6rem}
   .probe-name{color:var(--text-dim);font-size:0.65rem;margin-top:2px}
 
-  /* contrast slider */
-  .contrast-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:1rem}
-  .contrast-row .bl{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.08em;flex-shrink:0;white-space:nowrap}
-  .contrast-row input{flex:1}
-  input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--border-light);border-radius:2px;outline:none;cursor:pointer}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer}
-
-  /* bottom grid */
-  .bottom-grid{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start}
-
-  /* histogram */
-  #histCanvas{display:block;width:100%;border-radius:3px}
-
-  /* zone legend */
-  .zone-legend{display:flex;flex-direction:column;gap:0}
-  .zl-item{
-    display:flex;align-items:center;gap:0.75rem;padding:0.4rem 0;
-    border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;
-    border-radius:2px;padding-left:0.4rem;
+  .mode-badge{
+    position:absolute;top:10px;right:10px;
+    font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;
+    background:rgba(0,0,0,0.7);color:var(--accent);padding:3px 9px;border-radius:2px;pointer-events:none;
   }
-  .zl-item:hover{background:var(--accent-dim)}
-  .zl-item:last-child{border-bottom:none}
-  .zl-swatch{width:20px;height:20px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
-  .zl-gray{width:20px;height:20px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
-  .zl-num{font-family:var(--serif);font-size:1rem;color:var(--text);min-width:22px}
-  .zl-name{font-size:0.73rem;color:var(--text-dim);flex:1}
-  .zl-pct{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted)}
-
-  .zone-stat-bar{
-    height:3px;border-radius:2px;margin-top:2px;
-    background:var(--accent);transition:width 0.6s ease;
-  }
-
-  /* histogram wrapper */
-  .hist-wrap{position:relative}
-  .hist-cursor{
-    position:absolute;top:0;bottom:16px;width:1px;
-    pointer-events:none;display:none;
-    background:rgba(255,255,255,0.55);
-  }
-  .hist-comp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem}
-  .hist-comp-label{display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none}
-  .hist-comp-label input{accent-color:var(--accent);width:13px;height:13px;cursor:pointer}
-  .hist-comp-label span{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;color:var(--text-muted)}
 
   /* status bar */
   .status-bar{
-    display:flex;gap:2rem;align-items:center;
-    font-family:var(--mono);font-size:0.65rem;color:var(--text-muted);letter-spacing:0.06em;
-    padding:0.6rem 0.5rem;
+    flex-shrink:0;
+    display:flex;gap:1.5rem;align-items:center;
+    font-family:var(--mono);font-size:0.63rem;color:var(--text-muted);letter-spacing:0.06em;
+    padding:0.3rem 0.5rem;
+    background:var(--bg2);border:1px solid var(--border);border-radius:3px;
   }
   .status-bar .val{color:var(--accent)}
   .status-bar .sep{color:var(--border-light)}
 
-  /* mode label overlay */
-  .mode-badge{
-    position:absolute;top:10px;right:10px;
-    font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;
-    background:rgba(0,0,0,0.7);color:var(--accent);
-    padding:3px 9px;border-radius:2px;pointer-events:none;
+  /* ── splitter ── */
+  .splitter{
+    width:5px;flex-shrink:0;cursor:col-resize;
+    background:var(--border);margin:0 0.35rem;border-radius:3px;
+    transition:background 0.15s;position:relative;
   }
+  .splitter:hover,.splitter.dragging{background:var(--accent)}
+  .splitter::after{
+    content:'⋮';position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    color:var(--text-muted);font-size:12px;pointer-events:none;
+  }
+
+  /* ── right column ── */
+  .col-right{
+    width:320px;min-width:220px;max-width:560px;flex-shrink:0;
+    display:flex;flex-direction:column;gap:0.4rem;overflow:hidden;
+  }
+
+  /* ── collapsible panels ── */
+  .panel-section{
+    background:var(--bg2);border:1px solid var(--border);border-radius:4px;
+    display:flex;flex-direction:column;min-height:0;flex-shrink:0;
+  }
+  .panel-section.grows{flex:1;min-height:0}
+  .panel-hdr{
+    height:30px;padding:0 0.75rem;flex-shrink:0;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--text-muted);cursor:pointer;user-select:none;
+    border-bottom:1px solid var(--border);transition:color 0.15s;
+  }
+  .panel-hdr:hover{color:var(--accent)}
+  .panel-hdr.collapsed{border-bottom:none}
+  .toggle-arrow{font-size:0.65rem;color:var(--text-muted)}
+  .panel-body{padding:0.65rem 0.75rem;overflow:hidden}
+  .panel-body.scrollable{overflow-y:auto;flex:1;min-height:0}
+  .panel-body.hidden{display:none}
+
+  /* ── controls inside right panel ── */
+  .ctrl-group{margin-bottom:0.55rem}
+  .ctrl-group:last-child{margin-bottom:0}
+  .label{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.4rem}
+  .btn-row{display:flex;gap:0.3rem;flex-wrap:wrap}
+
+  .img-btn,.mode-btn{
+    background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+    color:var(--text-dim);font-family:var(--mono);font-size:0.62rem;
+    letter-spacing:0.04em;padding:0.35rem 0.6rem;cursor:pointer;transition:all 0.15s;
+  }
+  .img-btn:hover,.mode-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .img-btn.active,.mode-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .img-btn input{display:none}
+
+  /* contrast slider */
+  .contrast-row{display:flex;align-items:center;gap:0.6rem;margin-top:0.55rem}
+  .contrast-row .bl{font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);letter-spacing:0.06em;white-space:nowrap}
+  .contrast-row input{flex:1}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--border-light);border-radius:2px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer}
+
+  /* histogram */
+  .hist-comp-row{display:flex;align-items:center;justify-content:flex-end;margin-bottom:0.4rem}
+  .hist-comp-label{display:flex;align-items:center;gap:0.4rem;cursor:pointer;user-select:none}
+  .hist-comp-label input{accent-color:var(--accent);width:12px;height:12px;cursor:pointer}
+  .hist-comp-label span{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.06em;color:var(--text-muted)}
+  .hist-wrap{position:relative}
+  .hist-cursor{
+    position:absolute;top:0;bottom:0;width:1px;
+    pointer-events:none;display:none;
+    background:rgba(255,255,255,0.55);
+  }
+  #histCanvas{display:block;width:100%;border-radius:2px}
+
+  /* zone legend */
+  .zone-legend{display:flex;flex-direction:column;gap:0}
+  .zl-item{
+    display:flex;align-items:center;gap:0.6rem;padding:0.28rem 0;
+    border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;
+    border-radius:2px;padding-left:0.3rem;
+  }
+  .zl-item:hover{background:var(--accent-dim)}
+  .zl-item:last-child{border-bottom:none}
+  .zl-swatch{width:16px;height:16px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
+  .zl-gray{width:16px;height:16px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
+  .zl-num{font-family:var(--serif);font-size:0.9rem;color:var(--text);min-width:18px}
+  .zl-name{font-size:0.7rem;color:var(--text-dim);flex:1}
+  .zl-pct{font-family:var(--mono);font-size:0.58rem;color:var(--text-muted)}
+  .zone-stat-bar{height:2px;border-radius:2px;margin-top:2px;background:var(--accent);transition:width 0.6s ease}
 </style>
 </head>
 <body>
@@ -154,79 +176,101 @@
   <div class="hdr-num">05 — ZONENANALYSE</div>
 </header>
 
-<main>
-  <div class="eyebrow">05 — Zonenanalyse auf echtem Foto</div>
-  <h2>Zonen sichtbar machen</h2>
-  <p class="intro">Die Heatmap färbt jeden Bildpunkt nach seiner Zone ein — von Dunkelblau (Zone 0) bis Dunkelrot (Zone X). Das Histogramm zeigt die Verteilung aller Tonwerte über die 11 Zonen. Bewege die Maus über das Bild um die Zone an jedem Punkt zu lesen.</p>
+<div class="app-shell">
 
-  <div class="controls-row">
-    <span class="label" style="margin:0">Foto:</span>
-    <button class="img-btn active" onclick="loadPreset(0,this)">Stadtpanorama</button>
-    <button class="img-btn" onclick="loadPreset(1,this)">Portrait</button>
-    <button class="img-btn" onclick="loadPreset(2,this)">Landschaft</button>
-    <label class="img-btn" style="cursor:pointer">Eigenes Bild<input type="file" accept="image/*" onchange="loadUserFile(this)"></label>
-    <div class="divider-v"></div>
-    <span class="label" style="margin:0">Ansicht:</span>
-    <button class="mode-btn" id="btn-color" onclick="setMode('color',this)">Farbe</button>
-    <button class="mode-btn" id="btn-bw" onclick="setMode('bw',this)">S/W</button>
-    <button class="mode-btn active" id="btn-heat" onclick="setMode('heat',this)">Zonen-Heatmap</button>
+  <!-- ── LEFT: canvas ── -->
+  <div class="col-left">
+    <div class="canvas-container" id="canvasContainer">
+      <div id="p5-canvas-holder"></div>
+      <div class="probe" id="probe">
+        <div class="probe-inner">
+          <div class="probe-zone-num" id="probeZone">V</div>
+          <div class="probe-name" id="probeName">Mittleres Grau</div>
+          <div class="probe-lum" id="probeLum">Luminanz: 128</div>
+        </div>
+      </div>
+      <div class="mode-badge" id="modeBadge">ZONEN-HEATMAP</div>
+    </div>
+    <div class="status-bar">
+      <span>Zone: <span class="val" id="statZone">—</span></span>
+      <span class="sep">|</span>
+      <span>Luminanz: <span class="val" id="statLum">—</span></span>
+      <span class="sep">|</span>
+      <span>RGB: <span class="val" id="statRGB">—</span></span>
+      <span class="sep">|</span>
+      <span>Ø <span class="val" id="statAvg">—</span></span>
+    </div>
   </div>
 
-  <div class="contrast-row" id="contrastRow" style="display:none">
-    <span class="bl">KONTRAST</span>
-    <span class="bl">−100</span>
-    <input type="range" id="contrastSlider" min="-100" max="100" value="0" oninput="updateContrast()">
-    <span class="bl">+100</span>
-    <span style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);min-width:36px;text-align:right" id="contrastVal">0</span>
-  </div>
+  <div class="splitter" id="splitter"></div>
 
-  <div class="canvas-container" id="canvasContainer">
-    <div id="p5-canvas-holder"></div>
-    <div class="probe" id="probe">
-      <div class="probe-inner">
-        <div class="probe-zone-num" id="probeZone">V</div>
-        <div class="probe-name" id="probeName">Mittleres Grau</div>
-        <div class="probe-lum" id="probeLum">Luminanz: 128</div>
+  <!-- ── RIGHT: panels ── -->
+  <div class="col-right" id="colRight">
+
+    <!-- Controls -->
+    <div class="panel-section">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Einstellungen <span class="toggle-arrow">▾</span>
+      </div>
+      <div class="panel-body">
+        <div class="ctrl-group">
+          <span class="label">Foto</span>
+          <div class="btn-row">
+            <button class="img-btn active" onclick="loadPreset(0,this)">Stadtpanorama</button>
+            <button class="img-btn" onclick="loadPreset(1,this)">Portrait</button>
+            <button class="img-btn" onclick="loadPreset(2,this)">Landschaft</button>
+            <label class="img-btn" style="cursor:pointer">Eigenes Bild<input type="file" accept="image/*" onchange="loadUserFile(this)"></label>
+          </div>
+        </div>
+        <div class="ctrl-group">
+          <span class="label">Ansicht</span>
+          <div class="btn-row">
+            <button class="mode-btn" id="btn-color" onclick="setMode('color',this)">Farbe</button>
+            <button class="mode-btn" id="btn-bw" onclick="setMode('bw',this)">S/W</button>
+            <button class="mode-btn active" id="btn-heat" onclick="setMode('heat',this)">Zonen-Heatmap</button>
+          </div>
+          <div class="contrast-row" id="contrastRow" style="display:none">
+            <span class="bl">Kontrast</span>
+            <span class="bl">−100</span>
+            <input type="range" id="contrastSlider" min="-100" max="100" value="0" oninput="updateContrast()">
+            <span class="bl">+100</span>
+            <span style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);min-width:32px;text-align:right" id="contrastVal">0</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="mode-badge" id="modeBadge">ZONEN-HEATMAP</div>
-  </div>
 
-  <div class="status-bar">
-    <span>Zone: <span class="val" id="statZone">—</span></span>
-    <span class="sep">|</span>
-    <span>Luminanz: <span class="val" id="statLum">—</span></span>
-    <span class="sep">|</span>
-    <span>RGB: <span class="val" id="statRGB">—</span></span>
-    <span class="sep">|</span>
-    <span>Durchschnitt: <span class="val" id="statAvg">—</span></span>
-  </div>
-
-  <div class="bottom-grid">
-    <div>
-      <div class="hist-comp-row">
-        <span class="label" style="margin:0">Histogramm — Luminanzverteilung mit Zonengrenzen</span>
-        <label class="hist-comp-label">
-          <input type="checkbox" id="compensateCheck" onchange="toggleCompensate()">
-          <span>Extremwerte kompensieren</span>
-        </label>
+    <!-- Histogram -->
+    <div class="panel-section">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Histogramm <span class="toggle-arrow">▾</span>
       </div>
-      <div class="panel" style="padding:1rem;">
+      <div class="panel-body">
+        <div class="hist-comp-row">
+          <label class="hist-comp-label">
+            <input type="checkbox" id="compensateCheck" onchange="toggleCompensate()">
+            <span>Extremwerte kompensieren</span>
+          </label>
+        </div>
         <div class="hist-wrap" id="histWrap">
-          <canvas id="histCanvas" height="140"></canvas>
+          <canvas id="histCanvas" height="110"></canvas>
           <div class="hist-cursor" id="histCursor"></div>
         </div>
-        <div id="zoneBarLegend" style="display:flex;margin-top:4px;"></div>
       </div>
     </div>
-    <div>
-      <span class="label">Zonenverteilung im Bild</span>
-      <div class="panel" style="padding:0.75rem 1rem;">
+
+    <!-- Zone legend -->
+    <div class="panel-section grows">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Zonenverteilung <span class="toggle-arrow">▾</span>
+      </div>
+      <div class="panel-body scrollable">
         <div class="zone-legend" id="zoneLegend"></div>
       </div>
     </div>
-  </div>
-</main>
+
+  </div><!-- /col-right -->
+</div><!-- /app-shell -->
 
 <script>
 // ─── ZONE DATA ──────────────────────────────────────────────────────────
@@ -237,19 +281,18 @@ const ZONE_NAMES = [
 ];
 const ZONE_ROMANS = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
-// Heatmap colors per zone: vivid spectral palette blue→green→yellow→red
 const ZONE_HEAT = [
-  [10,  15, 120],   // 0  deep blue
-  [20,  60, 200],   // I  blue
-  [20, 130, 230],   // II sky blue
-  [20, 190, 190],   // III cyan
-  [30, 190, 100],   // IV teal-green
-  [80, 210,  30],   // V  green
-  [180,220,  10],   // VI yellow-green
-  [240,170,   0],   // VII yellow-orange
-  [240, 90,   0],   // VIII orange
-  [210,  20,  10],  // IX red
-  [140,   0,  10],  // X  dark red
+  [10,  15, 120],
+  [20,  60, 200],
+  [20, 130, 230],
+  [20, 190, 190],
+  [30, 190, 100],
+  [80, 210,  30],
+  [180,220,  10],
+  [240,170,   0],
+  [240, 90,   0],
+  [210,  20,  10],
+  [140,   0,  10],
 ];
 
 const IMAGES = [
@@ -262,44 +305,39 @@ function getLuminance(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; }
 function getZone(lum){ return Math.min(10, Math.floor(lum/256*11)); }
 function applyContrast(lum, c) {
   if (c === 0) return lum;
-  const cv = c * 2.55; // map -100..100 → -255..255
+  const cv = c * 2.55;
   const factor = (259 * (cv + 255)) / (255 * (259 - cv));
   return Math.max(0, Math.min(255, factor * (lum - 128) + 128));
 }
 
-// ─── P5 SKETCH ──────────────────────────────────────────────────────────
+// ─── STATE ──────────────────────────────────────────────────────────────
 let sourceImg = null;
-let imgPixels = null; // flat RGBA array from source
+let imgPixels = null;
 let imgW=0, imgH=0;
-let renderMode = 'heat'; // 'color' | 'bw' | 'heat'
-let contrastValue = 0; // -100 to +100
+let renderMode = 'heat';
+let contrastValue = 0;
 let histogram = new Array(256).fill(0);
 let zoneCounts = new Array(11).fill(0);
 let avgLum = 128;
 let p5inst = null;
-let outputGraphics = null;
 let needsRedraw = true;
 let canvasDisplayW = 800;
 let canvasDisplayH = 500;
 let cursorZone = -1;
-let cursorLum = 0;
-let cursorRGB = [0,0,0];
 let scaledImgW = 0, scaledImgH = 0;
 let offsetX = 0, offsetY = 0;
 
+// ─── P5 SKETCH ──────────────────────────────────────────────────────────
 const sketch = function(p) {
   p.setup = function() {
-    const holder = document.getElementById('p5-canvas-holder');
-    const w = Math.min(holder.parentElement.clientWidth - 2, 1100);
-    canvasDisplayW = w;
-    canvasDisplayH = Math.round(w * 0.55);
+    const container = document.getElementById('canvasContainer');
+    canvasDisplayW = container.clientWidth || 800;
+    canvasDisplayH = container.clientHeight || 500;
     const cnv = p.createCanvas(canvasDisplayW, canvasDisplayH);
     cnv.parent('p5-canvas-holder');
     p.noLoop();
     p.pixelDensity(1);
     p.noStroke();
-
-    // Load default image
     loadImageURL(IMAGES[0]);
   };
 
@@ -309,31 +347,24 @@ const sketch = function(p) {
     p.background(20);
 
     if (!imgPixels || imgW === 0) {
-      // loading state
-      p.fill(40);
-      p.rect(0,0,canvasDisplayW,canvasDisplayH);
-      p.fill(100);
-      p.textFont('DM Sans,sans-serif');
-      p.textSize(13);
+      p.fill(40); p.rect(0,0,canvasDisplayW,canvasDisplayH);
+      p.fill(100); p.textFont('DM Sans,sans-serif'); p.textSize(13);
       p.textAlign(p.CENTER, p.CENTER);
       p.text('Bild wird geladen…', canvasDisplayW/2, canvasDisplayH/2);
       return;
     }
 
-    // Scale to fit
     const scale = Math.min(canvasDisplayW/imgW, canvasDisplayH/imgH);
     scaledImgW = Math.round(imgW*scale);
     scaledImgH = Math.round(imgH*scale);
     offsetX = Math.round((canvasDisplayW-scaledImgW)/2);
     offsetY = Math.round((canvasDisplayH-scaledImgH)/2);
 
-    // Render to pixel buffer
     p.loadPixels();
     const d = p.pixels;
 
     for (let sy=0; sy<canvasDisplayH; sy++) {
       for (let sx=0; sx<canvasDisplayW; sx++) {
-        // Map canvas pixel to source image pixel
         const ix = Math.floor((sx-offsetX)/scale);
         const iy = Math.floor((sy-offsetY)/scale);
         const pi = (sy*canvasDisplayW+sx)*4;
@@ -354,25 +385,13 @@ const sketch = function(p) {
           const l=Math.round(applyContrast(lum, contrastValue));
           d[pi]=l;d[pi+1]=l;d[pi+2]=l;d[pi+3]=255;
         } else {
-          // heat: full heatmap
           const hc=ZONE_HEAT[zone];
-          d[pi  ]=hc[0];d[pi+1]=hc[1];d[pi+2]=hc[2];d[pi+3]=255;
+          d[pi]=hc[0];d[pi+1]=hc[1];d[pi+2]=hc[2];d[pi+3]=255;
         }
       }
     }
     p.updatePixels();
 
-    // Zone grid lines (only in heat mode)
-    if (renderMode==='heat') {
-      p.strokeWeight(0.5);
-      for (let z=1; z<=10; z++) {
-        const boundary = Math.round(z/11*255);
-        // Not drawing per-pixel boundaries here, handled in shader
-      }
-      p.noStroke();
-    }
-
-    // Cursor zone highlight ring
     if (cursorZone>=0) {
       const mx=p.mouseX, my=p.mouseY;
       if (mx>=offsetX&&mx<=offsetX+scaledImgW&&my>=offsetY&&my<=offsetY+scaledImgH) {
@@ -386,14 +405,8 @@ const sketch = function(p) {
     }
   };
 
-  p.mouseMoved = function() {
-    updateProbe(p.mouseX, p.mouseY);
-  };
-
-  p.mouseDragged = function() {
-    updateProbe(p.mouseX, p.mouseY);
-  };
-
+  p.mouseMoved = function() { updateProbe(p.mouseX, p.mouseY); };
+  p.mouseDragged = function() { updateProbe(p.mouseX, p.mouseY); };
   p.mouseOut = function() {
     document.getElementById('probe').style.display='none';
     document.getElementById('histCursor').style.display='none';
@@ -412,6 +425,7 @@ function updateProbe(mx,my) {
   const iy=Math.floor((my-offsetY)/((scaledImgH||1)/(imgH||1)));
   if (ix<0||iy<0||ix>=imgW||iy>=imgH) {
     document.getElementById('probe').style.display='none';
+    document.getElementById('histCursor').style.display='none';
     cursorZone=-1;
     p5inst.redraw();
     return;
@@ -422,9 +436,6 @@ function updateProbe(mx,my) {
   const zone=getZone(lum);
 
   cursorZone=zone;
-  cursorLum=Math.round(lum);
-  cursorRGB=[r,g,b];
-
   const probe=document.getElementById('probe');
   probe.style.display='block';
   probe.style.left=mx+'px';
@@ -444,19 +455,32 @@ function updateProbe(mx,my) {
   const hc=ZONE_HEAT[zone];
   histCursor.style.display='block';
   histCursor.style.left=Math.round(lum/255*hcw)+'px';
-  histCursor.style.background=`rgba(${hc[0]},${hc[1]},${hc[2]},0.8)`;
+  histCursor.style.background=`rgba(${hc[0]},${hc[1]},${hc[2]},0.85)`;
 
   needsRedraw=true;
   p5inst.redraw();
 }
 
-// ─── IMAGE LOADING ──────────────────────────────────────────────────────
+// ─── CANVAS RESIZE ───────────────────────────────────────────────────────
+function resizeCanvas() {
+  if (!p5inst) return;
+  const container = document.getElementById('canvasContainer');
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  if (w < 10 || h < 10) return;
+  canvasDisplayW = w;
+  canvasDisplayH = h;
+  p5inst.resizeCanvas(w, h);
+  needsRedraw = true;
+  p5inst.redraw();
+}
+
+// ─── IMAGE LOADING ───────────────────────────────────────────────────────
 function loadImageURL(url) {
   needsRedraw=true;
   const img=new Image();
   img.crossOrigin='anonymous';
   img.onload=()=>{
-    // Downsample to max 900px for performance
     const maxD=900;
     const scale=Math.min(1,maxD/Math.max(img.width,img.height));
     imgW=Math.round(img.width*scale);
@@ -468,47 +492,25 @@ function loadImageURL(url) {
     const data=ctx.getImageData(0,0,imgW,imgH);
     imgPixels=data.data;
     computeStats();
-    if (p5inst) {p5inst.redraw();}
+    if (p5inst) {needsRedraw=true;p5inst.redraw();}
   };
   img.onerror=()=>{
-    // Generate synthetic test image
     imgW=800;imgH=500;
     const off=document.createElement('canvas');
     off.width=imgW;off.height=imgH;
     const ctx=off.getContext('2d');
-    // Sky gradient
     const sky=ctx.createLinearGradient(0,0,0,imgH*0.55);
     sky.addColorStop(0,'#1a3a6a');sky.addColorStop(1,'#7aaecc');
     ctx.fillStyle=sky;ctx.fillRect(0,0,imgW,imgH*0.55);
-    // Ground
     const gnd=ctx.createLinearGradient(0,imgH*0.55,0,imgH);
     gnd.addColorStop(0,'#5a8040');gnd.addColorStop(1,'#3a5a28');
     ctx.fillStyle=gnd;ctx.fillRect(0,imgH*0.55,imgW,imgH*0.45);
-    // Sun
-    const sunGrd=ctx.createRadialGradient(600,120,0,600,120,80);
-    sunGrd.addColorStop(0,'#ffffc0');sunGrd.addColorStop(1,'rgba(255,255,200,0)');
-    ctx.fillStyle=sunGrd;ctx.fillRect(0,0,imgW,imgH);
-    // Clouds
-    ctx.fillStyle='rgba(255,255,255,0.85)';
-    ctx.beginPath();ctx.ellipse(200,100,120,40,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(250,85,80,30,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(700,140,100,35,0,0,Math.PI*2);ctx.fill();
-    // Tree silhouettes
-    ctx.fillStyle='#1a2a10';
-    for(let t=0;t<5;t++){
-      const tx=100+t*150;const th=120+Math.random()*60;
-      ctx.beginPath();ctx.moveTo(tx,imgH*0.55);
-      ctx.lineTo(tx-30,imgH*0.55-th*0.6);
-      ctx.lineTo(tx,imgH*0.55-th);
-      ctx.lineTo(tx+30,imgH*0.55-th*0.6);ctx.fill();
-    }
     const data=ctx.getImageData(0,0,imgW,imgH);
     imgPixels=data.data;
     computeStats();
-    if(p5inst){p5inst.redraw();}
+    if(p5inst){needsRedraw=true;p5inst.redraw();}
   };
   img.src=url;
-  // Show loading
   if(p5inst){needsRedraw=true;p5inst.redraw();}
 }
 
@@ -532,7 +534,7 @@ function computeStats() {
   buildZoneLegend();
 }
 
-// ─── HISTOGRAM ──────────────────────────────────────────────────────────
+// ─── HISTOGRAM ───────────────────────────────────────────────────────────
 let compensate = false;
 
 function toggleCompensate(){
@@ -542,23 +544,20 @@ function toggleCompensate(){
 
 function drawHistogram(){
   const canvas=document.getElementById('histCanvas');
-  const w=canvas.parentElement.clientWidth-32;
+  const wrap=document.getElementById('histWrap');
+  const w=wrap.clientWidth||260;
   canvas.width=w;
   const h=canvas.height;
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,w,h);
 
-  const chartH = h-16;
-  const barW = Math.max(1, Math.floor(w/256));
-  const total = histogram.reduce((a,b)=>a+b,0)||1;
+  const chartH=h-14;
+  const barW=Math.max(1,Math.floor(w/256));
+  const total=histogram.reduce((a,b)=>a+b,0)||1;
 
-  // Max: when compensating exclude bins 0 and 255
-  const innerMax = compensate
-    ? Math.max(...histogram.slice(1,255), 1)
-    : Math.max(...histogram, 1);
-  const max = innerMax * 0.85;
+  const innerMax=compensate ? Math.max(...histogram.slice(1,255),1) : Math.max(...histogram,1);
+  const max=innerMax*0.85;
 
-  // Zone background bands
   for(let z=0;z<11;z++){
     const x0=Math.round(z/11*w), x1=Math.round((z+1)/11*w);
     const hc=ZONE_HEAT[z];
@@ -566,22 +565,19 @@ function drawHistogram(){
     ctx.fillRect(x0,0,x1-x0,chartH);
   }
 
-  // Histogram bars
   for(let i=0;i<256;i++){
-    const cnt = histogram[i]||0;
+    const cnt=histogram[i]||0;
     if(!cnt) continue;
-    const x = Math.round(i/256*w);
-    const zone = getZone(i);
-    const hc = ZONE_HEAT[zone];
-    const isExtreme = compensate && (i===0||i===255);
+    const x=Math.round(i/256*w);
+    const zone=getZone(i);
+    const hc=ZONE_HEAT[zone];
+    const isExtreme=compensate&&(i===0||i===255);
 
     if(isExtreme){
-      // Overflow bar: full height, reduced opacity + hatch
       ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.35)`;
-      ctx.fillRect(x, 0, barW, chartH);
-      // Diagonal hatch
+      ctx.fillRect(x,0,barW,chartH);
       ctx.save();
-      ctx.beginPath(); ctx.rect(x,0,barW,chartH); ctx.clip();
+      ctx.beginPath();ctx.rect(x,0,barW,chartH);ctx.clip();
       ctx.strokeStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.6)`;
       ctx.lineWidth=1;
       for(let y=-chartH;y<chartH+barW;y+=5){
@@ -589,13 +585,12 @@ function drawHistogram(){
       }
       ctx.restore();
     } else {
-      const bh = Math.min(chartH, (cnt/max)*chartH);
+      const bh=Math.min(chartH,(cnt/max)*chartH);
       ctx.fillStyle=`rgba(${hc[0]},${hc[1]},${hc[2]},0.85)`;
-      ctx.fillRect(x, chartH-bh, barW, bh);
+      ctx.fillRect(x,chartH-bh,barW,bh);
     }
   }
 
-  // Zone boundary lines
   ctx.strokeStyle='rgba(200,169,126,0.45)';
   ctx.lineWidth=1;
   for(let z=1;z<=10;z++){
@@ -603,15 +598,13 @@ function drawHistogram(){
     ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,chartH);ctx.stroke();
   }
 
-  // Zone labels below
-  ctx.font='9px DM Mono, monospace';
+  ctx.font='8px DM Mono, monospace';
   ctx.fillStyle='rgba(107,102,96,0.9)';
   ctx.textAlign='center';
   for(let z=0;z<11;z++){
-    ctx.fillText(ZONE_ROMANS[z], Math.round((z+0.5)/11*w), h-3);
+    ctx.fillText(ZONE_ROMANS[z],Math.round((z+0.5)/11*w),h-2);
   }
 
-  // Average line
   const avgX=Math.round(avgLum/256*w);
   ctx.strokeStyle='rgba(200,169,126,0.9)';
   ctx.lineWidth=1.5;
@@ -619,36 +612,34 @@ function drawHistogram(){
   ctx.beginPath();ctx.moveTo(avgX,0);ctx.lineTo(avgX,chartH);ctx.stroke();
   ctx.setLineDash([]);
 
-  // Clipping labels (always shown)
-  const clip0 = histogram[0]/total*100;
-  const clip255 = histogram[255]/total*100;
-  ctx.font='bold 9px DM Mono, monospace';
-  ctx.textAlign='left';
-  const hc0=ZONE_HEAT[0], hc10=ZONE_HEAT[10];
+  const clip0=histogram[0]/total*100;
+  const clip255=histogram[255]/total*100;
+  ctx.font='bold 8px DM Mono, monospace';
+  const hc0=ZONE_HEAT[0],hc10=ZONE_HEAT[10];
   if(clip0>0.05){
+    ctx.textAlign='left';
     ctx.fillStyle=`rgba(${hc0[0]},${hc0[1]},${hc0[2]},0.9)`;
-    ctx.fillText(clip0.toFixed(1)+'%', 3, 11);
+    ctx.fillText(clip0.toFixed(1)+'%',3,10);
   }
   if(clip255>0.05){
     ctx.textAlign='right';
     ctx.fillStyle=`rgba(${hc10[0]},${hc10[1]},${hc10[2]},0.9)`;
-    ctx.fillText(clip255.toFixed(1)+'%', w-3, 11);
+    ctx.fillText(clip255.toFixed(1)+'%',w-3,10);
   }
 }
 
-// ─── ZONE LEGEND ────────────────────────────────────────────────────────
+// ─── ZONE LEGEND ─────────────────────────────────────────────────────────
 function buildZoneLegend(){
   const legend=document.getElementById('zoneLegend');
   legend.innerHTML='';
   const total=zoneCounts.reduce((a,b)=>a+b,0)||1;
   const maxCount=Math.max(...zoneCounts)||1;
-
   ZONE_ROMANS.forEach((rom,i)=>{
     const pct=(zoneCounts[i]/total*100).toFixed(1);
     const gv=Math.round(i/10*255);
     const hc=ZONE_HEAT[i];
     legend.innerHTML+=`
-      <div class="zl-item" onclick="">
+      <div class="zl-item">
         <div class="zl-swatch" style="background:rgb(${hc[0]},${hc[1]},${hc[2]})"></div>
         <div class="zl-gray" style="background:rgb(${gv},${gv},${gv})"></div>
         <span class="zl-num">${rom}</span>
@@ -661,7 +652,7 @@ function buildZoneLegend(){
   });
 }
 
-// ─── CONTROLS ───────────────────────────────────────────────────────────
+// ─── CONTROLS ────────────────────────────────────────────────────────────
 function setMode(mode,btn){
   renderMode=mode;
   document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
@@ -701,13 +692,57 @@ function loadUserFile(input){
   loadImageURL(url);
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────
-p5inst = new p5(sketch);
+// ─── PANEL COLLAPSE ───────────────────────────────────────────────────────
+function togglePanel(hdr){
+  const body=hdr.nextElementSibling;
+  const arrow=hdr.querySelector('.toggle-arrow');
+  const collapsed=body.classList.toggle('hidden');
+  hdr.classList.toggle('collapsed', collapsed);
+  if(arrow) arrow.textContent=collapsed?'▸':'▾';
+  if(!collapsed) {
+    // re-draw histogram when reopened
+    requestAnimationFrame(()=>{ if(imgPixels) drawHistogram(); });
+  }
+}
 
-// Redraw histogram on resize
-window.addEventListener('resize',()=>{
-  if(imgPixels)drawHistogram();
-});
+// ─── SPLITTER DRAG ────────────────────────────────────────────────────────
+(function(){
+  const splitter=document.getElementById('splitter');
+  const colRight=document.getElementById('colRight');
+  let dragging=false, startX=0, startW=0;
+  splitter.addEventListener('mousedown',e=>{
+    dragging=true; startX=e.clientX; startW=colRight.offsetWidth;
+    splitter.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const delta=startX-e.clientX;
+    const newW=Math.max(220,Math.min(560,startW+delta));
+    colRight.style.width=newW+'px';
+    resizeCanvas();
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!dragging)return;
+    dragging=false;
+    splitter.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+    resizeCanvas();
+    if(imgPixels) drawHistogram();
+  });
+})();
+
+// ─── RESIZE OBSERVER ─────────────────────────────────────────────────────
+new ResizeObserver(()=>{
+  resizeCanvas();
+  if(imgPixels) drawHistogram();
+}).observe(document.getElementById('canvasContainer'));
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+p5inst = new p5(sketch);
 </script>
 </body>
 </html>
