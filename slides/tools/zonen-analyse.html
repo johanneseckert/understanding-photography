@@ -336,7 +336,7 @@ const sketch = function(p) {
     const cnv = p.createCanvas(canvasDisplayW, canvasDisplayH);
     cnv.parent('p5-canvas-holder');
     p.noLoop();
-    p.pixelDensity(window.devicePixelRatio||1);
+    p.pixelDensity(1); // manual pixel loop requires 1:1 buffer — retina handled via CSS scaling
     p.noStroke();
     loadImageURL(IMAGES[0]);
   };
