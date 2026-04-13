@@ -371,7 +371,7 @@
   .lum-item {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .lum-color-swatch {
@@ -1053,10 +1053,10 @@ function updateLuminance() {
     const gHex = toHex(clum,clum,clum);
     grid.innerHTML += `
       <div class="lum-item">
+        <div class="lum-item-label">${cr} · ${cg} · ${cb}</div>
         <div class="lum-color-swatch" style="background:${cHex};"></div>
         <div class="lum-gray-swatch" style="background:${gHex};"></div>
-        <div class="lum-item-label">${cr} · ${cg} · ${cb}</div>
-        <div class="lum-item-label" style="font-size:0.55rem;color:var(--text-muted);letter-spacing:0.04em">${cHex.toUpperCase()}</div>
+        <div class="lum-item-label">L&thinsp;${clum}</div>
       </div>`;
   });
 }
