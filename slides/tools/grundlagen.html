@@ -753,8 +753,8 @@
           <div>
             <span class="label">Original</span>
             <div class="swatch-large" id="colorSwatch" style="background:#e84040;"></div>
-            <div class="value-display" id="hexVal">#E84040</div>
-            <div class="value-sub" id="rgbVal">RGB 232 · 64 · 64</div>
+            <div class="value-display" id="rgbVal">232 · 64 · 64</div>
+            <div class="value-sub" id="hexVal">#E84040</div>
           </div>
           <div>
             <span class="label">Nach S/W-Umwandlung</span>
@@ -1036,8 +1036,8 @@ function updateLuminance() {
 
   document.getElementById('colorSwatch').style.background = hex;
   document.getElementById('graySwatch').style.background = gray;
+  document.getElementById('rgbVal').textContent = `${r} · ${g} · ${b}`;
   document.getElementById('hexVal').textContent = hex.toUpperCase();
-  document.getElementById('rgbVal').textContent = `RGB ${r} · ${g} · ${b}`;
   document.getElementById('lumVal').textContent = lum;
   document.getElementById('formulaLive').textContent =
     `L = 0.2126×${r} + 0.7152×${g} + 0.0722×${b} = ${lum}`;
@@ -1055,7 +1055,8 @@ function updateLuminance() {
       <div class="lum-item">
         <div class="lum-color-swatch" style="background:${cHex};"></div>
         <div class="lum-gray-swatch" style="background:${gHex};"></div>
-        <div class="lum-item-label">${cHex.toUpperCase()}</div>
+        <div class="lum-item-label">${cr} · ${cg} · ${cb}</div>
+        <div class="lum-item-label" style="font-size:0.55rem;color:var(--text-muted);letter-spacing:0.04em">${cHex.toUpperCase()}</div>
       </div>`;
   });
 }
