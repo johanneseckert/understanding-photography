@@ -435,44 +435,34 @@ function doRender() {
   // Note: no ctx.scale — putImageData ignores transforms, so we work in physical pixels
 
   // Build tone-mapped output at physical pixel resolution (crisp on retina)
-  const outW = physW;
-  const outH = physH;
-  const outData = ctx.createImageData(outW, outH);
-
-  // Build histogram (use CSS-pixel grid to avoid counting DPR duplicates)
-  const histW = cssW;
-  const histH = cssH;
+  const outData = ctx.createImageData(physW, physH);
   const hist = new Array(256).fill(0);
   const zoneCounts = new Array(11).fill(0);
   let lumSum = 0;
-  let totalPx = histW * histH;
 
-  for (let y = 0; y < outH; y++) {
-    for (let x = 0; x < outW; x++) {
-      // Sample from raw image (nearest neighbour into physical pixels)
-      const sx = Math.min(rawW - 1, Math.floor(x / outW * rawW));
-      const sy = Math.min(rawH - 1, Math.floor(y / outH * rawH));
+  for (let y = 0; y < physH; y++) {
+    for (let x = 0; x < physW; x++) {
+      const sx = Math.min(rawW - 1, Math.floor(x / physW * rawW));
+      const sy = Math.min(rawH - 1, Math.floor(y / physH * rawH));
       const si = (sy * rawW + sx) * 4;
       const r = rawImageData[si], g = rawImageData[si+1], b = rawImageData[si+2];
 
       const lumRaw = getLuminance(r, g, b);
       const lum = Math.round(applyTone(lumRaw, toneValue));
 
-      const di = (y * outW + x) * 4;
+      const di = (y * physW + x) * 4;
       outData.data[di] = lum;
       outData.data[di+1] = lum;
       outData.data[di+2] = lum;
       outData.data[di+3] = 255;
 
-      // Only accumulate histogram for unique CSS pixels (avoid DPR inflation)
-      if (x < histW && y < histH) {
-        hist[lum]++;
-        zoneCounts[getZone(lum)]++;
-        lumSum += lum;
-      }
+      hist[lum]++;
+      zoneCounts[getZone(lum)]++;
+      lumSum += lum;
     }
   }
 
+  const totalPx = physW * physH; // percentages are ratios — DPR cancels out
   ctx.putImageData(outData, 0, 0);
   updateToneBadge();
   drawHistogram(hist, totalPx);
