@@ -120,6 +120,22 @@
   }
   .wr{color:#e87070} .wg{color:#7bc47b} .wb{color:#7098e8}
   .wlabel{color:var(--text-muted);font-size:0.6rem;margin-right:0.25rem}
+
+  /* ── filter diagram ── */
+  .filter-diagram{padding:0.85rem 1.25rem}
+  .fd-flow{display:flex;flex-direction:column;gap:0}
+  .fd-row{display:flex;padding:0.55rem 0}
+  .fd-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .fd-dot{width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+  .fd-col-label{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.03em;color:var(--text-muted);text-align:center}
+  .fd-val{font-family:var(--mono);font-size:0.58rem;color:var(--text-dim);text-align:center}
+  .fd-mid-strip{
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+    background:var(--bg3);padding:0.32rem 1rem;
+    display:flex;align-items:center;justify-content:center;gap:0.55rem;
+  }
+  .fd-mid-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,0.15)}
+  .fd-mid-name{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.09em;color:var(--text-dim)}
 </style>
 </head>
 <body>
@@ -183,6 +199,7 @@
         <span class="wg"><span class="wlabel">G</span><span id="wG">71.5%</span></span>
         <span class="wb"><span class="wlabel">B</span><span id="wB">7.2%</span></span>
       </div>
+      <div class="panel filter-diagram" id="filterDiagram"></div>
     </div>
   </div>
 </main>
@@ -191,7 +208,7 @@
 // ─── DATA ─────────────────────────────────────────────────────────────────
 const IMAGES = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000&q=80&fit=crop',
-  'https://images.unsplash.com/photo-1439853949212-36589f9bfa27?w=1000&q=80&fit=crop',
+  'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1000&q=80&fit=crop',
   'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1000&q=80&fit=crop',
 ];
 
@@ -235,6 +252,16 @@ const FILTERS = [
 
 const SCENE_LABELS = ['Himmel','Wolken','Laub','Rote Blüten','Haut'];
 const SCENE_COLORS = ['#4080c0','#ddd','#308030','#c03030','#e0a070'];
+
+const DEMO_COLORS = [
+  { name:'Rot',     rgb:[1.0, 0.0, 0.0], hex:'#e03030' },
+  { name:'Orange',  rgb:[1.0, 0.5, 0.0], hex:'#e07020' },
+  { name:'Gelb',    rgb:[1.0, 1.0, 0.0], hex:'#d4c000' },
+  { name:'Grün',    rgb:[0.0, 1.0, 0.0], hex:'#28b028' },
+  { name:'Cyan',    rgb:[0.0, 1.0, 1.0], hex:'#10a8c0' },
+  { name:'Blau',    rgb:[0.0, 0.0, 1.0], hex:'#2850d8' },
+  { name:'Violett', rgb:[0.5, 0.0, 1.0], hex:'#8030c0' },
+];
 
 // ─── WEBGL SETUP ──────────────────────────────────────────────────────────
 const canvas = document.getElementById('glCanvas');
@@ -397,6 +424,7 @@ function applyFilter(f){
   document.getElementById('wG').textContent=Math.round(f.g/total*1000)/10+'%';
   document.getElementById('wB').textContent=Math.round(f.b/total*1000)/10+'%';
   buildEffectTable(f);
+  buildFilterDiagram(f);
   render();
 }
 
@@ -410,6 +438,34 @@ function buildFilterGrid(){
     btn.onclick=()=>applyFilter(f);
     grid.appendChild(btn);
   });
+}
+
+function buildFilterDiagram(f){
+  const el = document.getElementById('filterDiagram');
+  const topRow = DEMO_COLORS.map(c =>
+    `<div class="fd-col">
+      <div class="fd-dot" style="background:${c.hex}"></div>
+      <div class="fd-col-label">${c.name}</div>
+    </div>`
+  ).join('');
+  const midLabel = f.id === 'none' ? 'STANDARD-LUMINANZ' : f.name.toUpperCase();
+  const midRow = `<div class="fd-mid-strip">
+    <span class="fd-mid-dot" style="background:${f.color}"></span>
+    <span class="fd-mid-name">${midLabel}</span>
+  </div>`;
+  const bottomRow = DEMO_COLORS.map(c => {
+    const bw = Math.min(1, Math.max(0, c.rgb[0]*f.r + c.rgb[1]*f.g + c.rgb[2]*f.b));
+    const v = Math.round(bw * 255);
+    return `<div class="fd-col">
+      <div class="fd-dot" style="background:rgb(${v},${v},${v})"></div>
+      <div class="fd-val">${Math.round(bw*100)}%</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="fd-flow">
+    <div class="fd-row">${topRow}</div>
+    ${midRow}
+    <div class="fd-row">${bottomRow}</div>
+  </div>`;
 }
 
 function buildEffectTable(f){
@@ -464,6 +520,7 @@ window.addEventListener('touchend',()=>dragging=false);
 // ─── INIT ─────────────────────────────────────────────────────────────────
 buildFilterGrid();
 buildEffectTable(FILTERS[0]);
+buildFilterDiagram(FILTERS[0]);
 loadImageURL(IMAGES[0]);
 </script>
 </body>
