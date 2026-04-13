@@ -81,10 +81,10 @@
   .probe-lum{color:var(--text-muted);font-size:0.6rem}
   .probe-name{color:var(--text-dim);font-size:0.65rem;margin-top:2px}
 
-  /* blend slider */
-  .blend-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:1rem}
-  .blend-row .bl{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.08em;flex-shrink:0}
-  .blend-row input{flex:1}
+  /* contrast slider */
+  .contrast-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:1rem}
+  .contrast-row .bl{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.08em;flex-shrink:0;white-space:nowrap}
+  .contrast-row input{flex:1}
   input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--border-light);border-radius:2px;outline:none;cursor:pointer}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer}
 
@@ -157,11 +157,12 @@
     <button class="mode-btn active" id="btn-heat" onclick="setMode('heat',this)">Zonen-Heatmap</button>
   </div>
 
-  <div class="blend-row" id="blendRow">
-    <span class="bl">S/W</span>
-    <input type="range" id="blendSlider" min="0" max="100" value="80" oninput="updateBlend()">
-    <span class="bl">HEATMAP</span>
-    <span style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);min-width:32px;text-align:right" id="blendPct">80%</span>
+  <div class="contrast-row" id="contrastRow" style="display:none">
+    <span class="bl">KONTRAST</span>
+    <span class="bl">−100</span>
+    <input type="range" id="contrastSlider" min="-100" max="100" value="0" oninput="updateContrast()">
+    <span class="bl">+100</span>
+    <span style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);min-width:36px;text-align:right" id="contrastVal">0</span>
   </div>
 
   <div class="canvas-container" id="canvasContainer">
@@ -235,13 +236,19 @@ const IMAGES = [
 
 function getLuminance(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; }
 function getZone(lum){ return Math.min(10, Math.floor(lum/256*11)); }
+function applyContrast(lum, c) {
+  if (c === 0) return lum;
+  const cv = c * 2.55; // map -100..100 → -255..255
+  const factor = (259 * (cv + 255)) / (255 * (259 - cv));
+  return Math.max(0, Math.min(255, factor * (lum - 128) + 128));
+}
 
 // ─── P5 SKETCH ──────────────────────────────────────────────────────────
 let sourceImg = null;
 let imgPixels = null; // flat RGBA array from source
 let imgW=0, imgH=0;
 let renderMode = 'heat'; // 'color' | 'bw' | 'heat'
-let blendAmt = 0.8;
+let contrastValue = 0; // -100 to +100
 let histogram = new Array(256).fill(0);
 let zoneCounts = new Array(11).fill(0);
 let avgLum = 128;
@@ -320,17 +327,12 @@ const sketch = function(p) {
         if (renderMode==='color') {
           d[pi]=r;d[pi+1]=g;d[pi+2]=b;d[pi+3]=255;
         } else if (renderMode==='bw') {
-          const l=Math.round(lum);
+          const l=Math.round(applyContrast(lum, contrastValue));
           d[pi]=l;d[pi+1]=l;d[pi+2]=l;d[pi+3]=255;
         } else {
-          // heat: blend between bw and zone color
-          const l=Math.round(lum);
+          // heat: full heatmap
           const hc=ZONE_HEAT[zone];
-          const bl=blendAmt;
-          d[pi  ]=Math.round(l*(1-bl)+hc[0]*bl);
-          d[pi+1]=Math.round(l*(1-bl)+hc[1]*bl);
-          d[pi+2]=Math.round(l*(1-bl)+hc[2]*bl);
-          d[pi+3]=255;
+          d[pi  ]=hc[0];d[pi+1]=hc[1];d[pi+2]=hc[2];d[pi+3]=255;
         }
       }
     }
@@ -483,7 +485,8 @@ function computeStats() {
   const total=(imgPixels.length/4);
   for(let i=0;i<imgPixels.length;i+=4){
     const r=imgPixels[i],g=imgPixels[i+1],b=imgPixels[i+2];
-    const lum=getLuminance(r,g,b);
+    const rawLum=getLuminance(r,g,b);
+    const lum=renderMode==='bw' ? applyContrast(rawLum, contrastValue) : rawLum;
     const li=Math.min(255,Math.round(lum));
     histogram[li]++;
     zoneCounts[getZone(lum)]++;
@@ -585,16 +588,18 @@ function setMode(mode,btn){
   btn.classList.add('active');
   const labels={color:'FARBE',bw:'SCHWARZ-WEISS',heat:'ZONEN-HEATMAP'};
   document.getElementById('modeBadge').textContent=labels[mode];
-  document.getElementById('blendRow').style.opacity=mode==='heat'?'1':'0.3';
-  document.getElementById('blendRow').style.pointerEvents=mode==='heat'?'auto':'none';
+  document.getElementById('contrastRow').style.display=mode==='bw'?'flex':'none';
   needsRedraw=true;
+  computeStats();
   p5inst.redraw();
 }
 
-function updateBlend(){
-  blendAmt=+document.getElementById('blendSlider').value/100;
-  document.getElementById('blendPct').textContent=Math.round(blendAmt*100)+'%';
+function updateContrast(){
+  contrastValue=+document.getElementById('contrastSlider').value;
+  const v=contrastValue;
+  document.getElementById('contrastVal').textContent=(v>0?'+':'')+v;
   needsRedraw=true;
+  computeStats();
   p5inst.redraw();
 }
 
@@ -602,6 +607,9 @@ function loadPreset(idx,btn){
   document.querySelectorAll('.img-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   imgPixels=null;imgW=0;imgH=0;
+  contrastValue=0;
+  document.getElementById('contrastSlider').value=0;
+  document.getElementById('contrastVal').textContent='0';
   loadImageURL(IMAGES[idx]);
 }
 

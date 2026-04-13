@@ -136,6 +136,7 @@
   }
   .fd-mid-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,0.15)}
   .fd-mid-name{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.09em;color:var(--text-dim)}
+  .fd-note{margin-top:0.6rem;font-size:0.72rem;color:var(--text-dim);line-height:1.6;border-top:1px solid var(--border);padding-top:0.55rem;font-style:italic}
 </style>
 </head>
 <body>
@@ -247,7 +248,8 @@ const FILTERS = [
     title:'Infrarot-Simulation',
     info:'Simuliert Infrarot-Film (Kodak HIE, Agfa Copex). Laub reflektiert Infrarot stark → wird fast weiß. Himmel: fast schwarz. Surrealer, traumhafter Look. Lith-Drucke in der Dunkelkammer.',
     physics:'Infrarot-Film reagiert auf 700–900nm. Nur roter Kanal approximiert IR-Effekte.',
-    effects:[['Himmel',0.05],['Wolken',0.92],['Laub',0.95],['Rote Blüten',0.98],['Haut',0.85]] },
+    effects:[['Himmel',0.05],['Wolken',0.90],['Laub',0.18],['Rote Blüten',0.96],['Haut',0.76]],
+    diagramNote:'Echtes IR-Laub (hell) kann diese Simulation nicht erzeugen — ein normales RGB-Foto enthält keine Nahinfrarot-Daten. Nur Rotkanal-Motive (Blüten, Haut) werden tatsächlich aufgehellt.' },
 ];
 
 const SCENE_LABELS = ['Himmel','Wolken','Laub','Rote Blüten','Haut'];
@@ -461,11 +463,13 @@ function buildFilterDiagram(f){
       <div class="fd-val">${Math.round(bw*100)}%</div>
     </div>`;
   }).join('');
+  const note = f.diagramNote
+    ? `<div class="fd-note">${f.diagramNote}</div>` : '';
   el.innerHTML = `<div class="fd-flow">
     <div class="fd-row">${topRow}</div>
     ${midRow}
     <div class="fd-row">${bottomRow}</div>
-  </div>`;
+  </div>${note}`;
 }
 
 function buildEffectTable(f){
