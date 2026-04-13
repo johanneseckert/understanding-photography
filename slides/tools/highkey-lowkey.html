@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 — High Key / Low Key</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c0c;--bg2:#141414;--bg3:#1c1c1c;
+    --border:#2a2a2a;--border-light:#383838;
+    --text:#e8e4de;--text-muted:#6b6660;--text-dim:#9b9590;
+    --accent:#c8a97e;--accent-dim:rgba(200,169,126,0.12);
+    --white:#f0ece6;
+    --mono:'DM Mono',monospace;--serif:'Cormorant Garamond',Georgia,serif;--sans:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;display:flex;flex-direction:column}
+
+  /* ── header ── */
+  header{
+    flex-shrink:0;z-index:200;
+    background:rgba(12,12,12,0.97);
+    border-bottom:1px solid var(--border);
+    padding:0 1.25rem;height:46px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .hdr-title{font-family:var(--serif);font-size:0.95rem;font-weight:300;color:var(--text-dim);text-align:center}
+  .hdr-title span{color:var(--accent)}
+  .back-link{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--text-muted);text-decoration:none;transition:color 0.15s;min-width:80px}
+  .back-link:hover{color:var(--accent)}
+  .hdr-num{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;color:var(--text-muted);min-width:80px;text-align:right}
+
+  /* ── app shell ── */
+  .app-shell{flex:1;display:flex;overflow:hidden;min-height:0;padding:0.6rem;gap:0}
+
+  /* ── left column ── */
+  .col-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.4rem;overflow:hidden}
+
+  .canvas-container{
+    flex:1;min-height:0;
+    position:relative;
+    border:1px solid var(--border);border-radius:4px;overflow:hidden;
+    background:#111;
+  }
+  #mainCanvas{display:block;width:100%;height:100%;object-fit:contain}
+
+  /* loading overlay */
+  .loading-overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(12,12,12,0.7);
+    font-family:var(--mono);font-size:0.7rem;letter-spacing:0.14em;color:var(--text-muted);
+    pointer-events:none;
+  }
+  .loading-overlay.hidden{display:none}
+
+  /* tone badge */
+  .tone-badge{
+    position:absolute;top:10px;right:10px;
+    font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;
+    background:rgba(0,0,0,0.7);color:var(--accent);padding:3px 9px;border-radius:2px;pointer-events:none;
+  }
+
+  /* status bar */
+  .status-bar{
+    flex-shrink:0;
+    display:flex;gap:1.5rem;align-items:center;
+    font-family:var(--mono);font-size:0.63rem;color:var(--text-muted);letter-spacing:0.06em;
+    padding:0.3rem 0.5rem;
+    background:var(--bg2);border:1px solid var(--border);border-radius:3px;
+  }
+  .status-bar .val{color:var(--accent)}
+  .status-bar .sep{color:var(--border-light)}
+
+  /* ── splitter ── */
+  .splitter{
+    width:5px;flex-shrink:0;cursor:col-resize;
+    background:var(--border);margin:0 0.35rem;border-radius:3px;
+    transition:background 0.15s;position:relative;
+  }
+  .splitter:hover,.splitter.dragging{background:var(--accent)}
+  .splitter::after{
+    content:'⋮';position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    color:var(--text-muted);font-size:12px;pointer-events:none;
+  }
+
+  /* ── right column ── */
+  .col-right{
+    width:320px;min-width:220px;max-width:560px;flex-shrink:0;
+    display:flex;flex-direction:column;gap:0.4rem;overflow:hidden;
+  }
+
+  /* ── collapsible panels ── */
+  .panel-section{
+    background:var(--bg2);border:1px solid var(--border);border-radius:4px;
+    display:flex;flex-direction:column;min-height:0;flex-shrink:0;
+  }
+  .panel-section.grows{flex:1;min-height:0}
+  .panel-hdr{
+    height:30px;padding:0 0.75rem;flex-shrink:0;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--text-muted);cursor:pointer;user-select:none;
+    border-bottom:1px solid var(--border);transition:color 0.15s;
+  }
+  .panel-hdr:hover{color:var(--accent)}
+  .panel-hdr.collapsed{border-bottom:none}
+  .toggle-arrow{font-size:0.65rem;color:var(--text-muted)}
+  .panel-body{padding:0.65rem 0.75rem;overflow:hidden}
+  .panel-body.scrollable{overflow-y:auto;flex:1;min-height:0}
+  .panel-body.hidden{display:none}
+
+  /* ── controls ── */
+  .ctrl-group{margin-bottom:0.55rem}
+  .ctrl-group:last-child{margin-bottom:0}
+  .label{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.4rem}
+  .btn-row{display:flex;gap:0.3rem;flex-wrap:wrap}
+  .img-btn{
+    background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+    color:var(--text-dim);font-family:var(--mono);font-size:0.62rem;
+    letter-spacing:0.04em;padding:0.35rem 0.6rem;cursor:pointer;transition:all 0.15s;
+  }
+  .img-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .img-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .img-btn input{display:none}
+
+  /* tone slider */
+  input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--border-light);border-radius:2px;outline:none;cursor:pointer;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer}
+
+  .tone-slider-wrap{margin-top:0.65rem}
+  .tone-labels{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.45rem}
+  .tone-label-low{font-family:var(--mono);font-size:0.6rem;color:#7090c0;letter-spacing:0.04em}
+  .tone-label-mid{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.04em;text-align:center}
+  .tone-label-high{font-family:var(--mono);font-size:0.6rem;color:#d0c090;letter-spacing:0.04em;text-align:right}
+  .tone-val-row{display:flex;align-items:center;justify-content:space-between;margin-top:0.45rem}
+  .tone-val{font-family:var(--mono);font-size:0.75rem;color:var(--accent);letter-spacing:0.06em}
+  .reset-btn{
+    background:none;border:1px solid var(--border);border-radius:2px;
+    color:var(--text-muted);font-family:var(--mono);font-size:0.56rem;letter-spacing:0.08em;
+    padding:2px 8px;cursor:pointer;transition:all 0.15s;
+  }
+  .reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* example thumbnails */
+  .thumb-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.45rem}
+  .thumb-item{
+    position:relative;cursor:pointer;border-radius:3px;overflow:hidden;
+    border:1px solid var(--border);transition:border-color 0.15s;aspect-ratio:3/2;
+  }
+  .thumb-item:hover{border-color:var(--accent)}
+  .thumb-item.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .thumb-item img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb-label{
+    position:absolute;bottom:0;left:0;right:0;
+    font-family:var(--mono);font-size:0.56rem;letter-spacing:0.08em;
+    padding:3px 6px;background:rgba(0,0,0,0.72);
+    color:var(--text-dim);
+  }
+  .thumb-item.hk .thumb-label{color:#d4c090}
+  .thumb-item.lk .thumb-label{color:#8090b8}
+  .thumb-item.neutral .thumb-label{color:var(--text-dim)}
+
+  /* histogram */
+  .hist-wrap{position:relative}
+  #histCanvas{display:block;width:100%;border-radius:2px}
+
+  /* zone band legend */
+  .zone-band-row{
+    display:flex;gap:0;margin-top:0.5rem;border-radius:2px;overflow:hidden;
+    height:6px;
+  }
+  .zone-band-row div{flex:1}
+
+  /* info panel */
+  .info-block{margin-bottom:0.75rem}
+  .info-block:last-child{margin-bottom:0}
+  .info-head{
+    font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:0.35rem;
+  }
+  .info-text{font-size:0.77rem;color:var(--text-dim);line-height:1.7}
+  .info-text strong{color:var(--text);font-weight:400}
+
+  /* zone stat row */
+  .zone-stat-row{display:flex;gap:0.5rem;margin-top:0.4rem}
+  .zone-stat{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0.4rem 0.5rem;text-align:center}
+  .zone-stat-lbl{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.2rem}
+  .zone-stat-val{font-family:var(--mono);font-size:0.8rem;color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="../index.html">← Übersicht</a>
+  <div class="hdr-title">Photoclub Reutlingen — <span>High Key / Low Key</span></div>
+  <div class="hdr-num">06 — HIGH KEY / LOW KEY</div>
+</header>
+
+<div class="app-shell">
+
+  <!-- ── LEFT: canvas ── -->
+  <div class="col-left">
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="mainCanvas"></canvas>
+      <div class="loading-overlay hidden" id="loadingOverlay">LÄDT …</div>
+      <div class="tone-badge" id="toneBadge">NEUTRAL</div>
+    </div>
+    <div class="status-bar">
+      <span>Ø Luminanz: <span class="val" id="statAvg">—</span></span>
+      <span class="sep">|</span>
+      <span>Schatten (0–III): <span class="val" id="statShadow">—</span></span>
+      <span class="sep">|</span>
+      <span>Mitteltöne (IV–VI): <span class="val" id="statMid">—</span></span>
+      <span class="sep">|</span>
+      <span>Lichter (VII–X): <span class="val" id="statHigh">—</span></span>
+    </div>
+  </div>
+
+  <div class="splitter" id="splitter"></div>
+
+  <!-- ── RIGHT: panels ── -->
+  <div class="col-right" id="colRight">
+
+    <!-- Examples -->
+    <div class="panel-section">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Beispiele <span class="toggle-arrow">▾</span>
+      </div>
+      <div class="panel-body">
+        <div class="thumb-grid" id="thumbGrid">
+          <div class="thumb-item hk active" data-idx="0" onclick="selectPreset(0,this)">
+            <img src="https://images.unsplash.com/photo-1526399232581-2ab5608b6336?w=240&q=70&fit=crop" alt="High Key Portrait" loading="lazy">
+            <div class="thumb-label">HIGH KEY — Portrait</div>
+          </div>
+          <div class="thumb-item hk" data-idx="1" onclick="selectPreset(1,this)">
+            <img src="https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=240&q=70&fit=crop" alt="High Key Landschaft" loading="lazy">
+            <div class="thumb-label">HIGH KEY — Schnee</div>
+          </div>
+          <div class="thumb-item lk" data-idx="2" onclick="selectPreset(2,this)">
+            <img src="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=240&q=70&fit=crop" alt="Low Key Portrait" loading="lazy">
+            <div class="thumb-label">LOW KEY — Portrait</div>
+          </div>
+          <div class="thumb-item lk" data-idx="3" onclick="selectPreset(3,this)">
+            <img src="https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=240&q=70&fit=crop" alt="Low Key Szene" loading="lazy">
+            <div class="thumb-label">LOW KEY — Szene</div>
+          </div>
+        </div>
+        <div style="margin-top:0.5rem">
+          <label class="img-btn" style="display:block;text-align:center;cursor:pointer">
+            Eigenes Bild laden
+            <input type="file" accept="image/*" onchange="loadUserFile(this)">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tone slider -->
+    <div class="panel-section">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Ton-Stil <span class="toggle-arrow">▾</span>
+      </div>
+      <div class="panel-body">
+        <div class="tone-slider-wrap">
+          <div class="tone-labels">
+            <span class="tone-label-low">LOW KEY</span>
+            <span class="tone-label-mid" id="toneStyleLabel">Neutral</span>
+            <span class="tone-label-high">HIGH KEY</span>
+          </div>
+          <input type="range" id="toneSlider" min="-100" max="100" value="0" oninput="onSliderInput()">
+          <div class="tone-val-row">
+            <span class="tone-val" id="toneValDisplay">0</span>
+            <button class="reset-btn" onclick="resetSlider()">Zurücksetzen</button>
+          </div>
+        </div>
+        <div class="zone-stat-row">
+          <div class="zone-stat">
+            <div class="zone-stat-lbl">Schatten</div>
+            <div class="zone-stat-val" id="pctShadow">—</div>
+          </div>
+          <div class="zone-stat">
+            <div class="zone-stat-lbl">Mitteltöne</div>
+            <div class="zone-stat-val" id="pctMid">—</div>
+          </div>
+          <div class="zone-stat">
+            <div class="zone-stat-lbl">Lichter</div>
+            <div class="zone-stat-val" id="pctHigh">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Histogram -->
+    <div class="panel-section">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Histogramm <span class="toggle-arrow">▾</span>
+      </div>
+      <div class="panel-body">
+        <div class="hist-wrap">
+          <canvas id="histCanvas" height="110"></canvas>
+        </div>
+        <div class="zone-band-row" id="zoneBandRow"></div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="panel-section grows">
+      <div class="panel-hdr" onclick="togglePanel(this)">
+        Theorie <span class="toggle-arrow">▾</span>
+      </div>
+      <div class="panel-body scrollable">
+        <div class="info-block">
+          <div class="info-head">Was ist High Key?</div>
+          <div class="info-text">
+            Bilder mit vorwiegend <strong>hellen Tönen (Zonen VII–X)</strong> und hohem Weißanteil.
+            Kontrast ist reduziert, Schatten oft eliminiert. Wirkt <strong>leicht, luftig, weich</strong> — typisch für Mode, Beauty, minimalistische Porträts.
+            <br><br>
+            In der Kamera: <strong>+1 bis +2 EV Belichtungskorrektur</strong>, heller Hintergrund, diffuses Licht von allen Seiten.
+            In der Nachbearbeitung: <strong>Lichter anheben, Tiefen auf dunkelgrau setzen</strong>, Blacks-Regler leicht erhöhen.
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-head">Was ist Low Key?</div>
+          <div class="info-text">
+            Bilder mit vorwiegend <strong>dunklen Tönen (Zonen 0–III)</strong> und dominanten Schatten.
+            Lichter sind betont durch Kontrast zum Dunkel. Wirkt <strong>dramatisch, geheimnisvoll, expressiv</strong> — klassisch bei Portraits, Theater, Architektur.
+            <br><br>
+            In der Kamera: <strong>−1 bis −2 EV Belichtungskorrektur</strong>, dunkler Hintergrund, gerichtetes hartes Licht (Spot).
+            In der Nachbearbeitung: <strong>Schatten absenken, Lichter kontrollieren</strong>, Kurve in den Tiefen nach unten.
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-head">Zonenverteilung</div>
+          <div class="info-text">
+            <strong>Neutral:</strong> Gleichmäßige Verteilung über alle Zonen, Ø Zone V (mittleres Grau).<br>
+            <strong>High Key:</strong> Schwerpunkt Zonen VII–X, Ø Zone VII–VIII, wenig bis keine Zone 0–II.<br>
+            <strong>Low Key:</strong> Schwerpunkt Zonen 0–III, Ø Zone II–III, wenig bis keine Zone VIII–X.
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-head">Dieser Slider</div>
+          <div class="info-text">
+            Simuliert eine <strong>Tonkurven-Verschiebung</strong>: High Key hebt Mitteltöne an und setzt die Tiefsten auf dunkelgrau (Lift). Low Key drückt Mitteltöne nach unten und verstärkt Kontrast in den Schatten.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /col-right -->
+</div><!-- /app-shell -->
+
+<script>
+// ─── ZONE DATA ──────────────────────────────────────────────────────────────
+const ZONE_ROMANS = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+const ZONE_HEAT = [
+  [10, 15,120],[20, 60,200],[20,130,230],[20,190,190],[30,190,100],
+  [80,210, 30],[180,220, 10],[240,170, 0],[240, 90, 0],[210, 20, 10],[140, 0, 10]
+];
+function getLuminance(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; }
+function getZone(lum){ return Math.min(10, Math.floor(lum/256*11)); }
+
+// ─── PRESETS ────────────────────────────────────────────────────────────────
+const PRESETS = [
+  { url:'https://images.unsplash.com/photo-1526399232581-2ab5608b6336?w=900&q=80&fit=crop', tone: 0 },
+  { url:'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=900&q=80&fit=crop', tone: 0 },
+  { url:'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=900&q=80&fit=crop', tone: 0 },
+  { url:'https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=900&q=80&fit=crop', tone: 0 },
+];
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let rawImageData = null; // original pixels from loaded image
+let rawW = 0, rawH = 0;
+let toneValue = 0;
+let renderPending = false;
+
+// ─── TONE MAPPING ────────────────────────────────────────────────────────────
+// t: -100 (low key) to +100 (high key)
+// High key: gamma compression + lift (raise blacks, brighten midtones)
+// Low key: gamma expansion (deepen midtones, maintain contrast in highlights)
+function applyTone(v, t) {
+  if (t === 0) return v;
+  const n = v / 255;
+  if (t > 0) {
+    // High key: brighten via gamma < 1 + lift blacks
+    const g = 1 - (t / 100) * 0.55;       // gamma: 1.0 → 0.45
+    const lift = (t / 100) * 0.13;          // lift blacks: 0 → 33/255
+    const mapped = Math.pow(n, g) * (1 - lift) + lift;
+    return Math.max(0, Math.min(255, mapped * 255));
+  } else {
+    // Low key: darken via gamma > 1 (mid crush)
+    const abs = -t / 100;
+    const g = 1 + abs * 1.2;               // gamma: 1.0 → 2.2
+    const crush = abs * 0.04;              // subtle highlight compression
+    const mapped = Math.pow(n, g) * (1 - crush);
+    return Math.max(0, Math.min(255, mapped * 255));
+  }
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+
+function scheduleRender() {
+  if (renderPending) return;
+  renderPending = true;
+  requestAnimationFrame(doRender);
+}
+
+function doRender() {
+  renderPending = false;
+  if (!rawImageData) return;
+
+  const wrap = document.getElementById('canvasContainer');
+  const dpr = window.devicePixelRatio || 1;
+
+  // Fit image into container maintaining aspect ratio
+  const maxW = wrap.clientWidth;
+  const maxH = wrap.clientHeight;
+  const scale = Math.min(maxW / rawW, maxH / rawH);
+  const cssW = Math.round(rawW * scale);
+  const cssH = Math.round(rawH * scale);
+
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.style.position = 'absolute';
+  canvas.style.left = Math.round((maxW - cssW) / 2) + 'px';
+  canvas.style.top = Math.round((maxH - cssH) / 2) + 'px';
+  ctx.scale(dpr, dpr);
+
+  // Build tone-mapped output at display resolution
+  const outW = cssW;
+  const outH = cssH;
+  const outData = ctx.createImageData(outW, outH);
+
+  // Build histogram
+  const hist = new Array(256).fill(0);
+  const zoneCounts = new Array(11).fill(0);
+  let lumSum = 0;
+  let totalPx = outW * outH;
+
+  for (let y = 0; y < outH; y++) {
+    for (let x = 0; x < outW; x++) {
+      // Sample from raw image (nearest neighbour)
+      const sx = Math.min(rawW - 1, Math.floor(x / outW * rawW));
+      const sy = Math.min(rawH - 1, Math.floor(y / outH * rawH));
+      const si = (sy * rawW + sx) * 4;
+      const r = rawImageData[si], g = rawImageData[si+1], b = rawImageData[si+2];
+
+      // Convert to luminance
+      const lumRaw = getLuminance(r, g, b);
+      const lum = Math.round(applyTone(lumRaw, toneValue));
+
+      const di = (y * outW + x) * 4;
+      outData.data[di] = lum;
+      outData.data[di+1] = lum;
+      outData.data[di+2] = lum;
+      outData.data[di+3] = 255;
+
+      hist[lum]++;
+      zoneCounts[getZone(lum)]++;
+      lumSum += lum;
+    }
+  }
+
+  ctx.putImageData(outData, 0, 0);
+  updateToneBadge();
+  drawHistogram(hist, totalPx);
+  updateStats(lumSum, totalPx, zoneCounts);
+}
+
+// ─── HISTOGRAM ──────────────────────────────────────────────────────────────
+function drawHistogram(hist, totalPx) {
+  const canvas = document.getElementById('histCanvas');
+  const wrap = document.getElementById('histWrap');
+  const dpr = window.devicePixelRatio || 1;
+  const w = wrap.clientWidth || 260;
+  const h = 110;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const c = canvas.getContext('2d');
+  c.scale(dpr, dpr);
+
+  c.clearRect(0, 0, w, h);
+
+  // Zone band backgrounds
+  for (let z = 0; z < 11; z++) {
+    const zx = z / 11 * w;
+    const zw = w / 11;
+    const gray = Math.round(z / 10 * 240);
+    c.fillStyle = `rgba(${gray},${gray},${gray},0.06)`;
+    c.fillRect(zx, 0, zw, h - 14);
+    // zone boundary lines
+    if (z > 0) {
+      c.strokeStyle = 'rgba(255,255,255,0.07)';
+      c.lineWidth = 0.5;
+      c.beginPath(); c.moveTo(zx, 0); c.lineTo(zx, h - 14); c.stroke();
+    }
+  }
+
+  // Find max (exclude extreme bins from scale)
+  let maxVal = 1;
+  for (let i = 2; i < 253; i++) maxVal = Math.max(maxVal, hist[i]);
+
+  // Draw bars
+  const barW = w / 256;
+  for (let i = 0; i < 256; i++) {
+    if (hist[i] === 0) continue;
+    const bh = Math.min((h - 14) * 0.95, (hist[i] / maxVal) * (h - 14) * 0.95);
+    const bx = i / 256 * w;
+    const zone = getZone(i);
+    const hc = ZONE_HEAT[zone];
+    c.fillStyle = `rgba(${hc[0]},${hc[1]},${hc[2]},0.75)`;
+    c.fillRect(bx, h - 14 - bh, Math.max(0.8, barW), bh);
+  }
+
+  // Zone labels
+  c.font = `${8 * 0.9}px 'DM Mono', monospace`;
+  c.textAlign = 'center';
+  for (let z = 0; z < 11; z++) {
+    const zx = (z + 0.5) / 11 * w;
+    c.fillStyle = 'rgba(155,149,144,0.7)';
+    c.fillText(ZONE_ROMANS[z], zx, h - 2);
+  }
+
+  // Average luminance line
+  if (totalPx > 0) {
+    let lumSum = 0;
+    for (let i = 0; i < 256; i++) lumSum += i * hist[i];
+    const avg = lumSum / totalPx;
+    const avgX = avg / 255 * w;
+    c.strokeStyle = 'rgba(200,169,126,0.7)';
+    c.lineWidth = 1;
+    c.setLineDash([3, 3]);
+    c.beginPath(); c.moveTo(avgX, 0); c.lineTo(avgX, h - 16); c.stroke();
+    c.setLineDash([]);
+    c.font = `${8}px 'DM Mono', monospace`;
+    c.textAlign = avgX > w * 0.6 ? 'right' : 'left';
+    c.fillStyle = 'rgba(200,169,126,0.85)';
+    c.fillText('Ø ' + ZONE_ROMANS[getZone(avg)], avgX + (avgX > w * 0.6 ? -4 : 4), 10);
+  }
+
+  // Zone band row (colored bar below histogram)
+  buildZoneBandRow();
+}
+
+function buildZoneBandRow() {
+  const row = document.getElementById('zoneBandRow');
+  if (row.children.length > 0) return; // already built
+  row.innerHTML = '';
+  for (let z = 0; z < 11; z++) {
+    const d = document.createElement('div');
+    const hc = ZONE_HEAT[z];
+    d.style.background = `rgb(${hc[0]},${hc[1]},${hc[2]})`;
+    row.appendChild(d);
+  }
+}
+
+// ─── STATS ──────────────────────────────────────────────────────────────────
+function updateStats(lumSum, totalPx, zoneCounts) {
+  if (totalPx === 0) return;
+  const avgLum = lumSum / totalPx;
+  const avgZone = ZONE_ROMANS[getZone(avgLum)];
+  document.getElementById('statAvg').textContent = `${Math.round(avgLum)} (Zone ${avgZone})`;
+
+  const shadow = (zoneCounts.slice(0,4).reduce((a,b)=>a+b,0) / totalPx * 100).toFixed(1);
+  const mid    = (zoneCounts.slice(4,7).reduce((a,b)=>a+b,0) / totalPx * 100).toFixed(1);
+  const high   = (zoneCounts.slice(7,11).reduce((a,b)=>a+b,0) / totalPx * 100).toFixed(1);
+
+  document.getElementById('statShadow').textContent = shadow + '%';
+  document.getElementById('statMid').textContent    = mid    + '%';
+  document.getElementById('statHigh').textContent   = high   + '%';
+
+  document.getElementById('pctShadow').textContent = shadow + '%';
+  document.getElementById('pctMid').textContent    = mid    + '%';
+  document.getElementById('pctHigh').textContent   = high   + '%';
+}
+
+function updateToneBadge() {
+  const badge = document.getElementById('toneBadge');
+  const t = toneValue;
+  if (t > 60)       { badge.textContent = 'HIGH KEY'; badge.style.color = '#d4c090'; }
+  else if (t > 25)  { badge.textContent = 'HIGH KEY TENDENZ'; badge.style.color = '#cbb878'; }
+  else if (t < -60) { badge.textContent = 'LOW KEY'; badge.style.color = '#8090b8'; }
+  else if (t < -25) { badge.textContent = 'LOW KEY TENDENZ'; badge.style.color = '#9098b0'; }
+  else              { badge.textContent = 'NEUTRAL'; badge.style.color = 'var(--accent)'; }
+}
+
+// ─── IMAGE LOADING ───────────────────────────────────────────────────────────
+function loadImageURL(url) {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    // Decode image into raw pixel data
+    const offscreen = document.createElement('canvas');
+    offscreen.width = img.naturalWidth;
+    offscreen.height = img.naturalHeight;
+    const oc = offscreen.getContext('2d');
+    oc.drawImage(img, 0, 0);
+    const data = oc.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
+    rawImageData = data.data;
+    rawW = img.naturalWidth;
+    rawH = img.naturalHeight;
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    scheduleRender();
+  };
+  img.onerror = () => {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  };
+  img.src = url;
+}
+
+function loadUserFile(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    // clear active thumb
+    document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+    loadImageURL(e.target.result);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function selectPreset(idx, el) {
+  document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadImageURL(PRESETS[idx].url);
+}
+
+// ─── SLIDER ─────────────────────────────────────────────────────────────────
+function onSliderInput() {
+  toneValue = parseInt(document.getElementById('toneSlider').value, 10);
+  document.getElementById('toneValDisplay').textContent = (toneValue > 0 ? '+' : '') + toneValue;
+
+  const lbl = document.getElementById('toneStyleLabel');
+  if (toneValue > 60)       lbl.textContent = 'High Key';
+  else if (toneValue > 25)  lbl.textContent = 'High Key Tendenz';
+  else if (toneValue < -60) lbl.textContent = 'Low Key';
+  else if (toneValue < -25) lbl.textContent = 'Low Key Tendenz';
+  else                      lbl.textContent = 'Neutral';
+
+  scheduleRender();
+}
+
+function resetSlider() {
+  document.getElementById('toneSlider').value = 0;
+  onSliderInput();
+}
+
+// ─── PANEL COLLAPSE ──────────────────────────────────────────────────────────
+function togglePanel(hdr) {
+  const body = hdr.nextElementSibling;
+  const arrow = hdr.querySelector('.toggle-arrow');
+  const collapsed = body.classList.toggle('hidden');
+  hdr.classList.toggle('collapsed', collapsed);
+  if (arrow) arrow.textContent = collapsed ? '▸' : '▾';
+}
+
+// ─── SPLITTER ────────────────────────────────────────────────────────────────
+(function(){
+  const splitter = document.getElementById('splitter');
+  const colRight  = document.getElementById('colRight');
+  let dragging = false, startX = 0, startW = 0;
+  splitter.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX; startW = colRight.offsetWidth;
+    splitter.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const delta = startX - e.clientX;
+    const newW = Math.max(220, Math.min(560, startW + delta));
+    colRight.style.width = newW + 'px';
+    scheduleRender();
+  });
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    splitter.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    scheduleRender();
+  });
+})();
+
+// ─── RESIZE ──────────────────────────────────────────────────────────────────
+new ResizeObserver(() => { scheduleRender(); }).observe(document.getElementById('canvasContainer'));
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadImageURL(PRESETS[0].url);
+</script>
+</body>
+</html>

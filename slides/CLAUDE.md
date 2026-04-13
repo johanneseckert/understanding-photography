@@ -49,6 +49,15 @@ Alle Seiten teilen dieselben CSS-Variablen:
 - Canvas-Histogramm mit 11 Zonen-Bändern + Durchschnittslinie
 - Zonenverteilung-Legende mit Prozentangaben
 
+### 06: highkey-lowkey.html
+- **2D Canvas** pixelweises Tone-Mapping in Echtzeit
+- 4 Preset-Beispiele: 2 High Key, 2 Low Key (Unsplash) + eigenes Bild
+- Ton-Stil-Slider: LOW KEY −100 ← 0 → +100 HIGH KEY
+- Gamma-Kurven-Simulation: High Key = Lift + Gamma-Kompression; Low Key = Gamma-Expansion
+- Histogramm mit Zonen-Farbbändern + Durchschnittslinie
+- Status-Bar: Ø Luminanz, % Schatten / Mitteltöne / Lichter
+- Theorie-Panel: Was ist High/Low Key, Kamera-Technik, Nachbearbeitung
+
 ## Hosting-Setup (TODO für Claude Code)
 
 ### GitHub Repo erstellen
