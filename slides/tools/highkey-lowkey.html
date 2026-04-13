@@ -423,35 +423,38 @@ function doRender() {
   const cssW = Math.round(rawW * scale);
   const cssH = Math.round(rawH * scale);
 
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
+  const physW = Math.round(cssW * dpr);
+  const physH = Math.round(cssH * dpr);
+  canvas.width = physW;
+  canvas.height = physH;
   canvas.style.width = cssW + 'px';
   canvas.style.height = cssH + 'px';
   canvas.style.position = 'absolute';
   canvas.style.left = Math.round((maxW - cssW) / 2) + 'px';
   canvas.style.top = Math.round((maxH - cssH) / 2) + 'px';
-  ctx.scale(dpr, dpr);
+  // Note: no ctx.scale — putImageData ignores transforms, so we work in physical pixels
 
-  // Build tone-mapped output at display resolution
-  const outW = cssW;
-  const outH = cssH;
+  // Build tone-mapped output at physical pixel resolution (crisp on retina)
+  const outW = physW;
+  const outH = physH;
   const outData = ctx.createImageData(outW, outH);
 
-  // Build histogram
+  // Build histogram (use CSS-pixel grid to avoid counting DPR duplicates)
+  const histW = cssW;
+  const histH = cssH;
   const hist = new Array(256).fill(0);
   const zoneCounts = new Array(11).fill(0);
   let lumSum = 0;
-  let totalPx = outW * outH;
+  let totalPx = histW * histH;
 
   for (let y = 0; y < outH; y++) {
     for (let x = 0; x < outW; x++) {
-      // Sample from raw image (nearest neighbour)
+      // Sample from raw image (nearest neighbour into physical pixels)
       const sx = Math.min(rawW - 1, Math.floor(x / outW * rawW));
       const sy = Math.min(rawH - 1, Math.floor(y / outH * rawH));
       const si = (sy * rawW + sx) * 4;
       const r = rawImageData[si], g = rawImageData[si+1], b = rawImageData[si+2];
 
-      // Convert to luminance
       const lumRaw = getLuminance(r, g, b);
       const lum = Math.round(applyTone(lumRaw, toneValue));
 
@@ -461,9 +464,12 @@ function doRender() {
       outData.data[di+2] = lum;
       outData.data[di+3] = 255;
 
-      hist[lum]++;
-      zoneCounts[getZone(lum)]++;
-      lumSum += lum;
+      // Only accumulate histogram for unique CSS pixels (avoid DPR inflation)
+      if (x < histW && y < histH) {
+        hist[lum]++;
+        zoneCounts[getZone(lum)]++;
+        lumSum += lum;
+      }
     }
   }
 
